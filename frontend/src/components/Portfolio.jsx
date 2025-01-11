@@ -2,7 +2,10 @@ import React, { useState, useEffect } from 'react';
 import { Terminal, Code, Box, Home as HomeIcon, Mail, Github, Linkedin } from 'lucide-react';
 import { ParticleField } from './ParticleField';
 import { TerminalWindow } from './TerminalWindow';
-import { ProjectCard } from './ProjectCard';
+import { ProjectCard } from './projects/ProjectCard';
+import { ProjectFilter } from './projects/ProjectFilter'; 
+import { ThemeToggle } from './theme/ThemeToggle';
+import { ResumeButton } from './resume/ResumeButton';
 import { Home } from './sections/Home';
 import { skills, experience, education } from '../data/portfolioData';
 import { fetchGithubRepos } from '../services/githubService';
@@ -12,6 +15,8 @@ export const Portfolio = () => {
   const [showTerminal, setShowTerminal] = useState(false);
   const [githubProjects, setGithubProjects] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [isDarkTheme, setIsDarkTheme] = useState(true);
+  const [selectedTech, setSelectedTech] = useState(null);
   const [formData, setFormData] = useState({
     name: '',
     email: '',
@@ -67,13 +72,19 @@ export const Portfolio = () => {
       setSubmitStatus('Message could not be sent. Please try again.');
       setTimeout(() => setSubmitStatus(null), 5000);
     }
-  };       
+  };
+
+  const filteredProjects = selectedTech
+    ? githubProjects.filter(project => project.technologies.includes(selectedTech))
+    : githubProjects;
+
+  const allTechnologies = [...new Set(githubProjects.flatMap(project => project.technologies))];
 
   return (
-    <div className="min-h-screen w-screen bg-gray-900 text-white relative overflow-x-hidden">
+    <div className={`min-h-screen w-screen ${isDarkTheme ? 'bg-gray-900' : 'bg-gray-100'} text-${isDarkTheme ? 'white' : 'gray-900'} relative overflow-x-hidden`}>
       <ParticleField />
       
-      <header className="fixed top-0 left-0 right-0 z-50 bg-gray-900/80 backdrop-blur-sm border-b border-gray-800">
+      <header className={`fixed top-0 left-0 right-0 z-50 ${isDarkTheme ? 'bg-gray-900/80' : 'bg-white/80'} backdrop-blur-sm border-b ${isDarkTheme ? 'border-gray-800' : 'border-gray-200'}`}>
         <nav className="container mx-auto px-4 sm:px-6 lg:px-8 py-4">
           <div className="flex justify-between items-center">
             <h1 
@@ -90,6 +101,10 @@ export const Portfolio = () => {
               >
                 <HomeIcon size={20} />
               </button>
+              <ThemeToggle 
+                isDark={isDarkTheme} 
+                onToggle={() => setIsDarkTheme(!isDarkTheme)} 
+              />
               <button
                 onClick={() => setShowTerminal(!showTerminal)}
                 className="p-2 hover:bg-gray-800 rounded-lg transition-colors"
@@ -124,7 +139,14 @@ export const Portfolio = () => {
         )}
 
         <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-12">
-          {activeSection === 'home' && <Home />}
+          {activeSection === 'home' && (
+            <>
+              <Home />
+              <div className="mt-8 flex justify-center">
+                <ResumeButton />
+              </div>
+            </>
+          )}
 
           {activeSection === 'about' && (
             <div className="max-w-4xl mx-auto">
@@ -178,11 +200,16 @@ export const Portfolio = () => {
           {activeSection === 'projects' && (
             <div className="max-w-6xl mx-auto">
               <h2 className="text-3xl font-bold mb-8">Projects</h2>
+              <ProjectFilter 
+                technologies={allTechnologies}
+                onFilter={setSelectedTech}
+                selectedTech={selectedTech}
+              />
               {isLoading ? (
                 <div className="text-center text-gray-400">Loading projects...</div>
               ) : (
                 <div className="grid md:grid-cols-2 gap-6">
-                  {githubProjects.map((project, index) => (
+                  {filteredProjects.map((project, index) => (
                     <ProjectCard key={project.id || index} project={project} />
                   ))}
                 </div>

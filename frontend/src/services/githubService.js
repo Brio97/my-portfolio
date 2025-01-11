@@ -1,32 +1,45 @@
 export const fetchGithubRepos = async () => {
-    // Fetch all repos including those you've contributed to
-    const response = await fetch('https://api.github.com/users/Brio97/repos?sort=updated&type=all&per_page=10', {
-      headers: {
-        'Accept': 'application/vnd.github.v3+json'
-      }
-    });
-    
-    if (!response.ok) {
-      throw new Error('Failed to fetch GitHub repos');
+    const GITHUB_TOKEN = import.meta.env.VITE_GITHUB_TOKEN;
+    let allRepos = [];
+    let page = 1;
+    let hasMore = true;
+
+    while (hasMore) {
+        const response = await fetch(`https://api.github.com/user/repos?per_page=100&page=${page}&type=all`, {
+            headers: {
+                'Accept': 'application/vnd.github.v3+json',
+                'Authorization': `token ${GITHUB_TOKEN}`
+            }
+        });
+
+        if (!response.ok) {
+            console.error('GitHub API Error:', await response.text());
+            break;
+        }
+
+        const repos = await response.json();
+        if (repos.length === 0) {
+            hasMore = false;
+        } else {
+            allRepos = [...allRepos, ...repos];
+            page++;
+        }
     }
-  
-    const repos = await response.json();
-    
-    // Sort repos by engagement metrics (stars, forks, watchers)
-    const sortedRepos = repos.sort((a, b) => {
-      const scoreA = a.stargazers_count + a.forks_count + a.watchers_count;
-      const scoreB = b.stargazers_count + b.forks_count + b.watchers_count;
-      return scoreB - scoreA;
+
+    const projectRepos = allRepos.filter(repo => {
+        const name = repo.name.toLowerCase();
+        const excludePatterns = ['config', '.github', 'setup', 'template'];
+        return !excludePatterns.some(pattern => name.includes(pattern));
     });
-  
-    // Take top 4 repos
-    return sortedRepos.slice(0, 4).map(repo => ({
-      name: repo.name,
-      description: repo.description,
-      language: repo.language,
-      homepage: repo.homepage,
-      html_url: repo.html_url,
-      stargazers_count: repo.stargazers_count,
-      forks_count: repo.forks_count
+
+    return projectRepos.map(repo => ({
+        name: repo.name,
+        description: repo.description || 'A cool project',
+        technologies: [repo.language].filter(Boolean),
+        homepage: repo.homepage,
+        html_url: repo.html_url,
+        stargazers_count: repo.stargazers_count,
+        forks_count: repo.forks_count,
+        isPrivate: repo.private
     }));
-  };  
+};
