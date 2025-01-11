@@ -1,16 +1,22 @@
 import React, { useState, useEffect } from 'react';
 import { Terminal, Code, Box, Home as HomeIcon, Mail, Github, Linkedin } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
 import { ParticleField } from './ParticleField';
 import { TerminalWindow } from './TerminalWindow';
 import { ProjectCard } from './projects/ProjectCard';
-import { ProjectFilter } from './projects/ProjectFilter'; 
+import { ProjectFilter } from './projects/ProjectFilter';
 import { ThemeToggle } from './theme/ThemeToggle';
 import { ResumeButton } from './resume/ResumeButton';
 import { Home } from './sections/Home';
+import { BlogSection } from './blog/BlogSection';
+import { LanguageSelector } from './language/LanguageSelector';
 import { skills, experience, education } from '../data/portfolioData';
 import { fetchGithubRepos } from '../services/githubService';
 
+import { useTranslation } from 'react-i18next';
+
 export const Portfolio = () => {
+  const { t } = useTranslation();
   const [activeSection, setActiveSection] = useState('home');
   const [showTerminal, setShowTerminal] = useState(false);
   const [githubProjects, setGithubProjects] = useState([]);
@@ -46,7 +52,10 @@ export const Portfolio = () => {
       case 'projects':
       case 'skills':
       case 'contact':
+      case 'blog':
         setActiveSection(command);
+        break;
+      default:
         break;
     }
   };
@@ -65,11 +74,11 @@ export const Portfolio = () => {
       
       if (response.ok) {
         setFormData({ name: '', email: '', message: '' });
-        setSubmitStatus('Thank you for your message! We will respond to your email within 24 hours.');
+        setSubmitStatus(t('portfolio.submitSuccess'));
         setTimeout(() => setSubmitStatus(null), 5000);
       }
     } catch (error) {
-      setSubmitStatus('Message could not be sent. Please try again.');
+      setSubmitStatus(t('portfolio.submitError'));
       setTimeout(() => setSubmitStatus(null), 5000);
     }
   };
@@ -81,25 +90,26 @@ export const Portfolio = () => {
   const allTechnologies = [...new Set(githubProjects.flatMap(project => project.technologies))];
 
   return (
-    <div className={`min-h-screen w-screen ${isDarkTheme ? 'bg-gray-900' : 'bg-gray-100'} text-${isDarkTheme ? 'white' : 'gray-900'} relative overflow-x-hidden`}>
+    <div className={`min-h-screen w-screen ${isDarkTheme ? 'bg-gray-900 text-white' : 'bg-gray-100 text-gray-800'} relative overflow-x-hidden`}>
       <ParticleField />
       
-      <header className={`fixed top-0 left-0 right-0 z-50 ${isDarkTheme ? 'bg-gray-900/80' : 'bg-white/80'} backdrop-blur-sm border-b ${isDarkTheme ? 'border-gray-800' : 'border-gray-200'}`}>
+      <header className={`fixed top-0 left-0 right-0 z-50 ${isDarkTheme ? 'bg-gray-900/80' : 'bg-white/90'} backdrop-blur-sm border-b ${isDarkTheme ? 'border-gray-800' : 'border-gray-200'}`}>
         <nav className="container mx-auto px-4 sm:px-6 lg:px-8 py-4">
           <div className="flex justify-between items-center">
             <h1 
               onClick={() => setActiveSection('home')}
-              className="text-2xl font-bold bg-gradient-to-r from-blue-400 to-purple-500 bg-clip-text text-transparent cursor-pointer"
+              className="text-2xl font-bold bg-gradient-to-r from-blue-500 to-purple-600 bg-clip-text text-transparent cursor-pointer"
             >
               Brian Mutai
             </h1>
             <div className="flex space-x-6">
+              <LanguageSelector isDark={isDarkTheme} />
               <button
                 onClick={() => setActiveSection('home')}
-                className="p-2 hover:bg-gray-800 rounded-lg transition-colors"
+                className={`p-2 ${isDarkTheme ? 'hover:bg-gray-800' : 'hover:bg-gray-100'} rounded-lg transition-colors`}
                 title="Home"
               >
-                <HomeIcon size={20} />
+                <HomeIcon size={20} className={isDarkTheme ? 'text-white' : 'text-gray-700'} />
               </button>
               <ThemeToggle 
                 isDark={isDarkTheme} 
@@ -107,24 +117,24 @@ export const Portfolio = () => {
               />
               <button
                 onClick={() => setShowTerminal(!showTerminal)}
-                className="p-2 hover:bg-gray-800 rounded-lg transition-colors"
+                className={`p-2 ${isDarkTheme ? 'hover:bg-gray-800' : 'hover:bg-gray-100'} rounded-lg transition-colors`}
                 title="Open Terminal"
               >
-                <Terminal size={20} />
+                <Terminal size={20} className={isDarkTheme ? 'text-white' : 'text-gray-700'} />
               </button>
               <button
                 onClick={() => setActiveSection('projects')}
-                className="p-2 hover:bg-gray-800 rounded-lg transition-colors"
+                className={`p-2 ${isDarkTheme ? 'hover:bg-gray-800' : 'hover:bg-gray-100'} rounded-lg transition-colors`}
                 title="Projects"
               >
-                <Code size={20} />
+                <Code size={20} className={isDarkTheme ? 'text-white' : 'text-gray-700'} />
               </button>
               <button
                 onClick={() => setActiveSection('skills')}
-                className="p-2 hover:bg-gray-800 rounded-lg transition-colors"
+                className={`p-2 ${isDarkTheme ? 'hover:bg-gray-800' : 'hover:bg-gray-100'} rounded-lg transition-colors`}
                 title="Skills"
               >
-                <Box size={20} />
+                <Box size={20} className={isDarkTheme ? 'text-white' : 'text-gray-700'} />
               </button>
             </div>
           </div>
@@ -134,25 +144,25 @@ export const Portfolio = () => {
       <main className="relative pt-20 min-h-screen w-full">
         {showTerminal && (
           <div className="fixed top-24 right-4 w-96 max-w-[90vw] z-50">
-            <TerminalWindow onCommand={handleCommand} />
+            <TerminalWindow onCommand={handleCommand} isDark={isDarkTheme} />
           </div>
         )}
 
         <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-12">
           {activeSection === 'home' && (
             <>
-              <Home />
+              <Home isDark={isDarkTheme} />
               <div className="mt-8 flex justify-center">
-                <ResumeButton />
+                <ResumeButton isDark={isDarkTheme} />
               </div>
             </>
           )}
 
           {activeSection === 'about' && (
             <div className="max-w-4xl mx-auto">
-              <h2 className="text-3xl font-bold mb-8">About Me</h2>
-              <div className="bg-gray-800/50 backdrop-blur-sm rounded-lg p-6">
-                <p className="text-gray-400 leading-relaxed">
+              <h2 className={`text-3xl font-bold mb-8 ${isDarkTheme ? 'text-white' : 'text-gray-800'}`}>About Me</h2>
+              <div className={`${isDarkTheme ? 'bg-gray-800/50' : 'bg-white'} shadow-lg backdrop-blur-sm rounded-lg p-6`}>
+                <p className={`leading-relaxed ${isDarkTheme ? 'text-gray-300' : 'text-gray-700'}`}>
                   I'm a Full Stack Developer with a strong background in Insurance Risk Analysis. My unique blend of technical skills and insurance industry expertise allows me to create innovative solutions that bridge both worlds.
                 </p>
               </div>
@@ -161,17 +171,17 @@ export const Portfolio = () => {
 
           {activeSection === 'experience' && (
             <div className="max-w-4xl mx-auto">
-              <h2 className="text-3xl font-bold mb-8">Experience</h2>
+              <h2 className={`text-3xl font-bold mb-8 ${isDarkTheme ? 'text-white' : 'text-gray-800'}`}>Experience</h2>
               <div className="space-y-8">
                 {experience.map((job, index) => (
-                  <div key={index} className="bg-gray-800/50 backdrop-blur-sm rounded-lg p-6 transform transition-all duration-300 hover:scale-105">
-                    <h3 className="text-xl font-bold text-blue-400">{job.title}</h3>
-                    <p className="text-gray-400 mb-4">{job.company} • {job.period}</p>
+                  <div key={index} className={`${isDarkTheme ? 'bg-gray-800/50' : 'bg-white'} shadow-lg backdrop-blur-sm rounded-lg p-6 transform transition-all duration-300 hover:scale-105`}>
+                    <h3 className="text-xl font-bold text-blue-600">{job.title}</h3>
+                    <p className={`mb-4 ${isDarkTheme ? 'text-gray-300' : 'text-gray-700'}`}>{job.company} • {job.period}</p>
                     <ul className="space-y-2">
                       {job.highlights.map((highlight, i) => (
                         <li key={i} className="flex items-start">
-                          <span className="text-blue-400 mr-2">•</span>
-                          {highlight}
+                          <span className="text-blue-600 mr-2">•</span>
+                          <span className={isDarkTheme ? 'text-gray-300' : 'text-gray-700'}>{highlight}</span>
                         </li>
                       ))}
                     </ul>
@@ -183,14 +193,14 @@ export const Portfolio = () => {
 
           {activeSection === 'education' && (
             <div className="max-w-4xl mx-auto">
-              <h2 className="text-3xl font-bold mb-8">Education</h2>
+              <h2 className={`text-3xl font-bold mb-8 ${isDarkTheme ? 'text-white' : 'text-gray-800'}`}>Education</h2>
               <div className="space-y-6">
                 {education.map((edu, index) => (
-                  <div key={index} className="bg-gray-800/50 backdrop-blur-sm rounded-lg p-6">
-                    <h3 className="text-xl font-bold text-blue-400">{edu.degree}</h3>
-                    <p className="text-gray-400">{edu.school}</p>
-                    <p className="text-gray-500">{edu.period} • {edu.location}</p>
-                    {edu.gpa && <p className="text-gray-400 mt-2">GPA: {edu.gpa}</p>}
+                  <div key={index} className={`${isDarkTheme ? 'bg-gray-800/50' : 'bg-white'} shadow-lg backdrop-blur-sm rounded-lg p-6`}>
+                    <h3 className="text-xl font-bold text-blue-600">{edu.degree}</h3>
+                    <p className={isDarkTheme ? 'text-gray-300' : 'text-gray-700'}>{edu.school}</p>
+                    <p className={isDarkTheme ? 'text-gray-400' : 'text-gray-600'}>{edu.period} • {edu.location}</p>
+                    {edu.gpa && <p className={`mt-2 ${isDarkTheme ? 'text-gray-300' : 'text-gray-700'}`}>GPA: {edu.gpa}</p>}
                   </div>
                 ))}
               </div>
@@ -199,18 +209,23 @@ export const Portfolio = () => {
 
           {activeSection === 'projects' && (
             <div className="max-w-6xl mx-auto">
-              <h2 className="text-3xl font-bold mb-8">Projects</h2>
+              <h2 className={`text-3xl font-bold mb-8 ${isDarkTheme ? 'text-white' : 'text-gray-800'}`}>Projects</h2>
               <ProjectFilter 
                 technologies={allTechnologies}
                 onFilter={setSelectedTech}
                 selectedTech={selectedTech}
+                isDark={isDarkTheme}
               />
               {isLoading ? (
-                <div className="text-center text-gray-400">Loading projects...</div>
+                <div className={`text-center ${isDarkTheme ? 'text-gray-300' : 'text-gray-700'}`}>Loading projects...</div>
               ) : (
                 <div className="grid md:grid-cols-2 gap-6">
                   {filteredProjects.map((project, index) => (
-                    <ProjectCard key={project.id || index} project={project} />
+                    <ProjectCard 
+                      key={project.id || index} 
+                      project={project}
+                      isDark={isDarkTheme}
+                    />
                   ))}
                 </div>
               )}
@@ -218,40 +233,59 @@ export const Portfolio = () => {
           )}
 
           {activeSection === 'skills' && (
-            <div className="max-w-6xl mx-auto">
-              <h2 className="text-3xl font-bold mb-8">Skills</h2>
+            <motion.div 
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              className="max-w-6xl mx-auto"
+            >
+              <h2 className={`text-3xl font-bold mb-8 ${isDarkTheme ? 'text-white' : 'text-gray-900'}`}>Skills</h2>
               <div className="grid md:grid-cols-2 gap-6">
                 {Object.entries(skills).map(([category, skillList]) => (
-                  <div key={category} className="bg-gray-800/50 backdrop-blur-sm rounded-lg p-6">
-                    <h3 className="text-xl font-bold text-blue-400 mb-4">{category}</h3>
-                    <div className="flex flex-wrap gap-2">
+                  <div key={category} className={`${isDarkTheme ? 'bg-gray-800/50' : 'bg-white'} backdrop-blur-sm rounded-lg p-6`}>
+                    <h3 className="text-xl font-bold text-blue-500 mb-4">{category}</h3>
+                    <div className="space-y-4">
                       {skillList.map((skill, index) => (
-                        <span
-                          key={index}
-                          className="bg-blue-500/20 text-blue-300 px-3 py-1 rounded-full"
-                        >
-                          {skill}
-                        </span>
+                        <div key={index} className="w-full">
+                          <div className="flex justify-between mb-1">
+                            <span className={isDarkTheme ? 'text-gray-300' : 'text-gray-700'}>{skill}</span>
+                            <span className={isDarkTheme ? 'text-gray-400' : 'text-gray-600'}>85%</span>
+                          </div>
+                          <motion.div 
+                            className="h-2 bg-gray-700 rounded-full overflow-hidden"
+                            initial={{ width: 0 }}
+                            animate={{ width: "100%" }}
+                            transition={{ duration: 0.8, delay: index * 0.1 }}
+                          >
+                            <div className="h-full bg-blue-500 rounded-full" style={{ width: '85%' }} />
+                          </motion.div>
+                        </div>
                       ))}
                     </div>
                   </div>
                 ))}
               </div>
-            </div>
+            </motion.div>
           )}
+
+          {activeSection === 'blog' && <BlogSection isDark={isDarkTheme} />}
 
           {activeSection === 'contact' && (
             <div className="max-w-4xl mx-auto">
-              <h2 className="text-3xl font-bold mb-8">Contact</h2>
+              <h2 className={`text-3xl font-bold mb-8 ${isDarkTheme ? 'text-white' : 'text-gray-800'}`}>Contact</h2>
               <div className="grid md:grid-cols-2 gap-8">
-                <div className="bg-gray-800/50 backdrop-blur-sm rounded-lg p-6">
+                <div className={`${isDarkTheme ? 'bg-gray-800/50' : 'bg-white'} shadow-lg backdrop-blur-sm rounded-lg p-6`}>
                   <form onSubmit={handleSubmit} className="space-y-4">
                     <input
                       type="text"
                       placeholder="Name"
                       value={formData.name}
                       onChange={e => setFormData({...formData, name: e.target.value})}
-                      className="w-full bg-gray-700/50 rounded p-2"
+                      className={`w-full ${
+                        isDarkTheme 
+                          ? 'bg-gray-700/50 text-white placeholder-gray-400' 
+                          : 'bg-white text-gray-900 placeholder-gray-500 border border-gray-200'
+                      } rounded p-2`}
                       required
                     />
                     <input
@@ -259,17 +293,25 @@ export const Portfolio = () => {
                       placeholder="Email"
                       value={formData.email}
                       onChange={e => setFormData({...formData, email: e.target.value})}
-                      className="w-full bg-gray-700/50 rounded p-2"
+                      className={`w-full ${
+                        isDarkTheme 
+                          ? 'bg-gray-700/50 text-white placeholder-gray-400' 
+                          : 'bg-white text-gray-900 placeholder-gray-500 border border-gray-200'
+                      } rounded p-2`}
                       required
                     />
                     <textarea
                       placeholder="Message"
                       value={formData.message}
                       onChange={e => setFormData({...formData, message: e.target.value})}
-                      className="w-full bg-gray-700/50 rounded p-2 h-32"
+                      className={`w-full ${
+                        isDarkTheme 
+                          ? 'bg-gray-700/50 text-white placeholder-gray-400' 
+                          : 'bg-white text-gray-900 placeholder-gray-500 border border-gray-200'
+                      } rounded p-2 h-32`}
                       required
                     />
-                    <button type="submit" className="bg-blue-500 hover:bg-blue-600 px-4 py-2 rounded">
+                    <button type="submit" className="bg-blue-500 hover:bg-blue-600 px-4 py-2 rounded text-white">
                       Send Message
                     </button>
                     {submitStatus && (
@@ -279,15 +321,15 @@ export const Portfolio = () => {
                     )}
                   </form>
                 </div>
-                <div className="bg-gray-800/50 backdrop-blur-sm rounded-lg p-6">
+                <div className={`${isDarkTheme ? 'bg-gray-800/50' : 'bg-white'} shadow-lg backdrop-blur-sm rounded-lg p-6`}>
                   <div className="space-y-4">
-                    <p className="flex items-center text-gray-400">
+                    <p className={`flex items-center ${isDarkTheme ? 'text-gray-300' : 'text-gray-700'}`}>
                       <Mail className="mr-2" /> Email: Mutai.brian79@gmail.com
                     </p>
-                    <p className="flex items-center text-gray-400">
+                    <p className={`flex items-center ${isDarkTheme ? 'text-gray-300' : 'text-gray-700'}`}>
                       <Linkedin className="mr-2" /> LinkedIn: brian-mutai-158397202
                     </p>
-                    <p className="flex items-center text-gray-400">
+                    <p className={`flex items-center ${isDarkTheme ? 'text-gray-300' : 'text-gray-700'}`}>
                       <Github className="mr-2" /> GitHub: Brio97
                     </p>
                   </div>
@@ -300,3 +342,5 @@ export const Portfolio = () => {
     </div>
   );
 };
+
+export default Portfolio;
