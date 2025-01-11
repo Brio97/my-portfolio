@@ -5,7 +5,13 @@ from routes.contact import contact_bp
 
 def create_app():
     app = Flask(__name__)
-    CORS(app, resources={r"/api/*": {"origins": "http://localhost:5000"}})
+    CORS(app, resources={
+        r"/api/*": {
+            "origins": ["http://localhost:5000"],
+            "methods": ["POST", "OPTIONS"],
+            "allow_headers": ["Content-Type"]
+        }
+    })
     
     app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///portfolio.db'
     app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False

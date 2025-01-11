@@ -17,6 +17,7 @@ export const Portfolio = () => {
     email: '',
     message: ''
   });
+  const [submitStatus, setSubmitStatus] = useState(null);
 
   useEffect(() => {
     const loadGithubProjects = async () => {
@@ -57,18 +58,16 @@ export const Portfolio = () => {
         body: JSON.stringify(formData)
       });
       
-      const data = await response.json();
-      console.log('Response:', data);
-      
       if (response.ok) {
-        // Add success message display here
         setFormData({ name: '', email: '', message: '' });
+        setSubmitStatus('Thank you for your message! We will respond to your email within 24 hours.');
+        setTimeout(() => setSubmitStatus(null), 5000);
       }
     } catch (error) {
-      console.log('Server Response:', error);
-      // Add error message display here
+      setSubmitStatus('Message could not be sent. Please try again.');
+      setTimeout(() => setSubmitStatus(null), 5000);
     }
-  };   
+  };       
 
   return (
     <div className="min-h-screen w-screen bg-gray-900 text-white relative overflow-x-hidden">
@@ -246,6 +245,11 @@ export const Portfolio = () => {
                     <button type="submit" className="bg-blue-500 hover:bg-blue-600 px-4 py-2 rounded">
                       Send Message
                     </button>
+                    {submitStatus && (
+                      <div className="mt-4 p-4 bg-green-500/20 text-green-300 rounded-lg">
+                        {submitStatus}
+                      </div>
+                    )}
                   </form>
                 </div>
                 <div className="bg-gray-800/50 backdrop-blur-sm rounded-lg p-6">
