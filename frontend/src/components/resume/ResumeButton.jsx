@@ -7,6 +7,6 @@ export const ResumeButton = () => (
     className="flex items-center gap-2 bg-blue-500/20 text-blue-300 hover:bg-blue-500/30 px-4 py-2 rounded transition-colors"
   >
     <FileDown size={20} />
-    Download Resume
+    <span data-translate>Download Resume</span>
   </a>
 );

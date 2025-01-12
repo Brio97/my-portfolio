@@ -4,13 +4,13 @@ import { Github, Mail, Linkedin } from 'lucide-react';
 export const Home = () => {
   return (
     <div className="text-center mt-24">
-      <h1 className="text-5xl font-bold mb-6 bg-gradient-to-r from-blue-400 to-purple-500 bg-clip-text text-transparent">
+      <h1 data-translate className="text-5xl font-bold mb-6 bg-gradient-to-r from-blue-400 to-purple-500 bg-clip-text text-transparent">
         Brian Mutai
       </h1>
-      <h2 className="text-2xl text-gray-400 mb-6">
+      <h2 data-translate className="text-2xl text-gray-400 mb-6">
         Full Stack Developer | Insurance Risk Analyst
       </h2>
-      <p className="text-xl text-gray-400 mb-8 max-w-2xl mx-auto">
+      <p data-translate className="text-xl text-gray-400 mb-8 max-w-2xl mx-auto">
         Bridging the gap between insurance industry expertise and modern software development
       </p>
       <div className="flex justify-center space-x-6">
