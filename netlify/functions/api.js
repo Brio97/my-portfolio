@@ -10,10 +10,10 @@ const transporter = nodemailer.createTransport({
 });
 
 exports.handler = async (event) => {
-  const path = event.path.split('/').pop();
+  const fullPath = event.path.replace('/.netlify/functions/api/', '');
 
   try {
-    switch (path) {
+    switch (fullPath) {
       case 'contact':
         const { name, email, message } = JSON.parse(event.body);
         await transporter.sendMail({
@@ -97,7 +97,7 @@ exports.handler = async (event) => {
       default:
         return {
           statusCode: 404,
-          body: JSON.stringify({ error: 'Not Found' })
+          body: JSON.stringify({ error: 'Not Found', path: fullPath })
         };
     }
   } catch (error) {

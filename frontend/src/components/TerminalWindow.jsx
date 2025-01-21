@@ -60,32 +60,87 @@ export const TerminalWindow = ({ onCommand, isDark }) => {
   const handleCommand = async (e) => {
     if (e.key === 'Enter' && input.trim()) {
       const newHistory = [...history, `> ${input}`];
-      
-      // Direct handling of help and clear commands
       const trimmedInput = input.toLowerCase().trim();
-      if (trimmedInput === 'help') {
-        newHistory.push('Available commands:', ...Object.entries(commands).map(([cmd, desc]) => `${cmd}: ${desc}`));
-        setHistory(newHistory);
-        setCommandHistory(prev => [...prev, input]);
-        setHistoryIndex(-1);
-        setInput('');
-        return;
+
+      // Direct command handling
+      switch(trimmedInput) {
+        case 'help':
+          newHistory.push('Available commands:', ...Object.entries(commands).map(([cmd, desc]) => `${cmd}: ${desc}`));
+          setHistory(newHistory);
+          setCommandHistory(prev => [...prev, input]);
+          setHistoryIndex(-1);
+          setInput('');
+          return;
+
+        case 'clear':
+          setHistory([]);
+          setInput('');
+          return;
+
+        case 'time':
+          newHistory.push(new Date().toLocaleTimeString());
+          setHistory(newHistory);
+          setCommandHistory(prev => [...prev, input]);
+          setHistoryIndex(-1);
+          setInput('');
+          return;
+
+        case 'social':
+          newHistory.push(
+            'Social Media Links:',
+            '• GitHub: https://github.com/Brio97',
+            '• LinkedIn: https://linkedin.com/in/brian-mutai-158397202' ,
+            '• Twitter: @yobrade20'
+          );
+          setHistory(newHistory);
+          setCommandHistory(prev => [...prev, input]);
+          setHistoryIndex(-1);
+          setInput('');
+          return;
+
+        case 'weather':
+          setIsLoading(true);
+          newHistory.push('Fetching weather data...');
+          try {
+            let locationData = userLocation;
+            if (!locationData) {
+              const position = await getLocationWithTimeout();
+              locationData = await getLocationDetails(
+                position.coords.latitude,
+                position.coords.longitude
+              );
+              setUserLocation(locationData);
+            }
+            
+            const response = await fetch(`/.netlify/functions/api/weather?lat=${locationData.lat}&lon=${locationData.lon}&appid=${import.meta.env.VITE_WEATHER_API_KEY}`);
+            const data = await response.json();
+            newHistory.push(`Current weather in ${locationData.city}: ${data.weather[0].main}, ${Math.round(data.main.temp - 273.15)}°C`);
+          } catch (error) {
+            try {
+              const response = await fetch(`/.netlify/functions/api/weather?q=Nairobi&appid=${import.meta.env.VITE_WEATHER_API_KEY}`);
+              const data = await response.json();
+              newHistory.push(`Current weather in Nairobi: ${data.weather[0].main}, ${Math.round(data.main.temp - 273.15)}°C`);
+            } catch (fallbackError) {
+              newHistory.push('Weather service temporarily unavailable');
+            }
+          } finally {
+            setIsLoading(false);
+          }
+          setHistory(newHistory);
+          setCommandHistory(prev => [...prev, input]);
+          setHistoryIndex(-1);
+          setInput('');
+          return;
       }
 
-      if (trimmedInput === 'clear') {
-        setHistory([]);
-        setInput('');
-        return;
-      }
-
+      // Handle other commands with translation
       setIsLoading(true);
-      
       try {
         const response = await fetch('/.netlify/functions/api/translate', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ 
-            q: input.toLowerCase().trim(),
+            q: trimmedInput,
             target: 'en'
           })
         });
@@ -101,64 +156,15 @@ export const TerminalWindow = ({ onCommand, isDark }) => {
             command.includes(word)
           )
         ) || translatedText;
-      
-        switch(cmd) {
-          case 'time':
-            newHistory.push(new Date().toLocaleTimeString());
-            break;
 
-          case 'weather':
-            newHistory.push('Fetching weather data...');
-            try {
-              let locationData = userLocation;
-              if (!locationData) {
-                const position = await getLocationWithTimeout();
-                locationData = await getLocationDetails(
-                  position.coords.latitude,
-                  position.coords.longitude
-                );
-                setUserLocation(locationData);
-              }
-              
-              const response = await fetch(`/.netlify/functions/api/weather?lat=${locationData.lat}&lon=${locationData.lon}&appid=${import.meta.env.VITE_WEATHER_API_KEY}`);
-              const data = await response.json();
-              newHistory.push(`Current weather in ${locationData.city}: ${data.weather[0].main}, ${Math.round(data.main.temp - 273.15)}°C`);
-            } catch (error) {
-              try {
-                const response = await fetch(`/.netlify/functions/api/weather?q=Nairobi&appid=${import.meta.env.VITE_WEATHER_API_KEY}`);
-                const data = await response.json();
-                newHistory.push(`Current weather in Nairobi: ${data.weather[0].main}, ${Math.round(data.main.temp - 273.15)}°C`);
-              } catch (fallbackError) {
-                newHistory.push('Weather service temporarily unavailable');
-              }
-            }
-            break;
-
-          case 'social':
-            newHistory.push(
-              'Social Media Links:',
-              '• GitHub: https://github.com/Brio97',
-              '• LinkedIn: https://linkedin.com/in/brian-mutai-158397202',
-              '• Twitter: @yobrade20'
-            );
-            break;
-
-          case 'theme':
-            onCommand('theme');
-            newHistory.push('Theme toggled successfully');
-            break;
-
-          default:
-            const isKnownCommand = Object.keys(commands).includes(cmd);
-            if (isKnownCommand) {
-              onCommand(cmd);
-              newHistory.push(`Executing: ${cmd}`);
-            } else {
-              newHistory.push(`Command not recognized: ${input}`);
-            }
+        if (Object.keys(commands).includes(cmd)) {
+          onCommand(cmd);
+          newHistory.push(`Executing: ${cmd}`);
+        } else {
+          newHistory.push(`Command not recognized: ${input}`);
         }
       } catch (error) {
-        const directCmd = input.toLowerCase().trim();
+        const directCmd = trimmedInput;
         if (Object.keys(commands).includes(directCmd)) {
           onCommand(directCmd);
           newHistory.push(`Executing: ${directCmd}`);
