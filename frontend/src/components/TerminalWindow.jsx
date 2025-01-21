@@ -1,13 +1,23 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useMemo } from 'react';
+import { FixedSizeList } from 'react-window';
+import { getLocationDetails } from '../services/location';
+import Logo from '/src/assets/portfolio-logo.webp';
 
 export const TerminalWindow = ({ onCommand, isDark }) => {
   const [input, setInput] = useState('');
-  const [history, setHistory] = useState(['Welcome! Type "help" for commands']);
+  const [history, setHistory] = useState([
+    <div key="welcome" className="flex items-center gap-2">
+      <img src={Logo} alt="Logo" className="w-4 h-4" />
+      Welcome! Type "help" for commands
+    </div>
+  ]);
   const [commandHistory, setCommandHistory] = useState([]);
   const [historyIndex, setHistoryIndex] = useState(-1);
+  const [isLoading, setIsLoading] = useState(false);
+  const [userLocation, setUserLocation] = useState(null);
   const inputRef = useRef(null);
 
-  const commands = {
+  const commands = useMemo(() => ({
     help: 'List all available commands',
     clear: 'Clear terminal screen',
     about: 'About me',
@@ -21,14 +31,38 @@ export const TerminalWindow = ({ onCommand, isDark }) => {
     weather: 'Check current weather',
     time: 'Show current time',
     blog: 'View blog posts',
+  }), []);
+
+  const getLocationWithTimeout = () => {
+    return new Promise((resolve, reject) => {
+      const timeout = setTimeout(() => {
+        reject(new Error('Location request timed out'));
+      }, 5000);
+
+      navigator.geolocation.getCurrentPosition(
+        (position) => {
+          clearTimeout(timeout);
+          resolve(position);
+        },
+        (error) => {
+          clearTimeout(timeout);
+          reject(error);
+        },
+        { 
+          enableHighAccuracy: true,
+          timeout: 5000,
+          maximumAge: 0 
+        }
+      );
+    });
   };
 
   const handleCommand = async (e) => {
     if (e.key === 'Enter' && input.trim()) {
       const newHistory = [...history, `> ${input}`];
+      setIsLoading(true);
       
       try {
-        // First translation to get the English equivalent
         const response = await fetch('/api/translate', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
@@ -41,7 +75,6 @@ export const TerminalWindow = ({ onCommand, isDark }) => {
         const data = await response.json();
         const translatedText = data.data.translations[0].translatedText.toLowerCase().trim();
         
-        // Enhanced command matching
         const words = translatedText.split(/\s+/);
         const cmd = Object.keys(commands).find(command => 
           words.some(word => 
@@ -55,23 +88,43 @@ export const TerminalWindow = ({ onCommand, isDark }) => {
           case 'help':
             newHistory.push('Available commands:', ...Object.entries(commands).map(([cmd, desc]) => `${cmd}: ${desc}`));
             break;
+
           case 'clear':
             setHistory([]);
             setInput('');
             return;
+
           case 'time':
             newHistory.push(new Date().toLocaleTimeString());
             break;
+
           case 'weather':
             newHistory.push('Fetching weather data...');
             try {
-              const response = await fetch(`/api/weather?q=Nairobi&appid=${import.meta.env.VITE_WEATHER_API_KEY}`);
+              let locationData = userLocation;
+              if (!locationData) {
+                const position = await getLocationWithTimeout();
+                locationData = await getLocationDetails(
+                  position.coords.latitude,
+                  position.coords.longitude
+                );
+                setUserLocation(locationData);
+              }
+              
+              const response = await fetch(`/api/weather?lat=${locationData.lat}&lon=${locationData.lon}&appid=${import.meta.env.VITE_WEATHER_API_KEY}`);
               const data = await response.json();
-              newHistory.push(`Current weather in Nairobi: ${data.weather[0].main}, ${Math.round(data.main.temp - 273.15)}°C`);
+              newHistory.push(`Current weather in ${locationData.city}: ${data.weather[0].main}, ${Math.round(data.main.temp - 273.15)}°C`);
             } catch (error) {
-              newHistory.push('Error fetching weather data');
+              try {
+                const response = await fetch(`/api/weather?q=Nairobi&appid=${import.meta.env.VITE_WEATHER_API_KEY}`);
+                const data = await response.json();
+                newHistory.push(`Current weather in Nairobi: ${data.weather[0].main}, ${Math.round(data.main.temp - 273.15)}°C`);
+              } catch (fallbackError) {
+                newHistory.push('Weather service temporarily unavailable');
+              }
             }
             break;
+
           case 'social':
             newHistory.push(
               'Social Media Links:',
@@ -87,7 +140,6 @@ export const TerminalWindow = ({ onCommand, isDark }) => {
             break;
 
           default:
-            // Check if the translated command matches any of our known commands
             const isKnownCommand = Object.keys(commands).includes(cmd);
             if (isKnownCommand) {
               onCommand(cmd);
@@ -97,7 +149,6 @@ export const TerminalWindow = ({ onCommand, isDark }) => {
             }
         }
       } catch (error) {
-        // Fallback to direct command processing if translation fails
         const directCmd = input.toLowerCase().trim();
         if (Object.keys(commands).includes(directCmd)) {
           onCommand(directCmd);
@@ -105,6 +156,8 @@ export const TerminalWindow = ({ onCommand, isDark }) => {
         } else {
           newHistory.push(`Command not recognized: ${input}`);
         }
+      } finally {
+        setIsLoading(false);
       }
       
       setHistory(newHistory);
@@ -135,6 +188,20 @@ export const TerminalWindow = ({ onCommand, isDark }) => {
     }
   };
 
+  const HistoryList = ({ items }) => (
+    <FixedSizeList
+      height={200}
+      itemCount={items.length}
+      itemSize={35}
+      width="100%"
+      className={isDark ? 'text-green-400' : 'text-green-600'}
+    >
+      {({ index, style }) => (
+        <div style={style} className="mb-1">{items[index]}</div>
+      )}
+    </FixedSizeList>
+  );
+
   useEffect(() => {
     inputRef.current?.focus();
   }, []);
@@ -142,18 +209,25 @@ export const TerminalWindow = ({ onCommand, isDark }) => {
   return (
     <div className={`${isDark ? 'bg-gray-900 border-gray-700' : 'bg-white border-gray-200'} border rounded-lg p-4 font-mono shadow-lg`}>
       <div className="flex items-center justify-between mb-2">
-        <div className="flex space-x-2">
-          <div className="w-3 h-3 rounded-full bg-red-500"></div>
-          <div className="w-3 h-3 rounded-full bg-yellow-500"></div>
-          <div className="w-3 h-3 rounded-full bg-green-500"></div>
+        <div className="flex items-center space-x-4">
+          <div className="flex space-x-2">
+            <div className="w-3 h-3 rounded-full bg-red-500"></div>
+            <div className="w-3 h-3 rounded-full bg-yellow-500"></div>
+            <div className="w-3 h-3 rounded-full bg-green-500"></div>
+          </div>
+          <img src={Logo} alt="Terminal Logo" className="w-5 h-5" />
         </div>
-        <span data-translate className={isDark ? 'text-gray-400' : 'text-gray-600'}>portfolio-terminal</span>
+        <span className={isDark ? 'text-gray-400' : 'text-gray-600'}>portfolio-terminal</span>
       </div>
-      <div className={`h-48 overflow-auto ${isDark ? 'text-green-400' : 'text-green-600'} mb-2`}>
-        {history.map((line, i) => (
-          <div data-translate key={i} className="mb-1">{line}</div>
-        ))}
+      <div className="h-48 overflow-auto mb-2">
+        <HistoryList items={history} />
       </div>
+      {isLoading && (
+        <div className={`text-center py-2 ${isDark ? 'text-green-400' : 'text-green-600'} flex items-center justify-center gap-2`}>
+          <img src={Logo} alt="Loading" className="w-4 h-4 animate-spin" />
+          Processing...
+        </div>
+      )}
       <div className="flex items-center">
         <span className={isDark ? 'text-green-400' : 'text-green-600'}>$</span>
         <input
@@ -164,6 +238,7 @@ export const TerminalWindow = ({ onCommand, isDark }) => {
           onKeyDown={handleCommand}
           className={`${isDark ? 'bg-transparent text-green-400' : 'bg-transparent text-green-600'} outline-none flex-1 ml-2`}
           autoFocus
+          disabled={isLoading}
         />
       </div>
     </div>

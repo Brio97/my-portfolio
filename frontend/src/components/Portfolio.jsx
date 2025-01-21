@@ -13,6 +13,7 @@ import { LanguageSelector } from './language/LanguageSelector';
 import { skills, experience, education } from '../data/portfolioData';
 import { fetchGithubRepos } from '../services/githubService';
 import { useTranslation } from 'react-i18next';
+import Logo from '/src/assets/portfolio-logo.webp';
 
 export const Portfolio = () => {
   const { t } = useTranslation();
@@ -90,11 +91,11 @@ export const Portfolio = () => {
       
       if (response.ok) {
         setFormData({ name: '', email: '', message: '' });
-        setSubmitStatus(t('portfolio.submitSuccess'));
+        setSubmitStatus(t('Message sent successfully'));
         setTimeout(() => setSubmitStatus(null), 5000);
       }
     } catch (error) {
-      setSubmitStatus(t('portfolio.submitError'));
+      setSubmitStatus(t('There was an error submitting your message!!!'));
       setTimeout(() => setSubmitStatus(null), 5000);
     }
   };
@@ -112,12 +113,12 @@ export const Portfolio = () => {
       <header className={`fixed top-0 left-0 right-0 z-50 ${isDarkTheme ? 'bg-gray-900/80' : 'bg-white/90'} backdrop-blur-sm border-b ${isDarkTheme ? 'border-gray-800' : 'border-gray-200'}`}>
         <nav className="container mx-auto px-4 sm:px-6 lg:px-8 py-4">
           <div className="flex justify-between items-center">
-            <h1 
+            <img 
+              src={Logo} 
+              alt="Brand Logo" 
               onClick={() => handleSectionChange('home')}
-              className="text-2xl font-bold bg-gradient-to-r from-blue-500 to-purple-600 bg-clip-text text-transparent cursor-pointer"
-            >
-              Brian Mutai
-            </h1>
+              className="w-10 h-10 cursor-pointer hover:opacity-80 transition-opacity"
+            />
             <div className="flex space-x-6">
               <LanguageSelector isDark={isDarkTheme} />
               <button
