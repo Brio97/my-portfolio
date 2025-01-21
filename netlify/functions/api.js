@@ -65,14 +65,21 @@ exports.handler = async (event) => {
         };
 
       case 'weather':
+        console.log('Weather request received:', event.queryStringParameters);
+        const weatherUrl = `https://api.openweathermap.org/data/2.5/weather?${
+          event.queryStringParameters.q 
+            ? `q=${event.queryStringParameters.q}` 
+            : `lat=${event.queryStringParameters.lat}&lon=${event.queryStringParameters.lon}`
+        }&appid=${process.env.VITE_WEATHER_API_KEY}`;
+        
         try {
-          const weatherUrl = `https://api.openweathermap.org/data/2.5/weather?${event.queryStringParameters.q ? `q=${event.queryStringParameters.q}` : `lat=${event.queryStringParameters.lat}&lon=${event.queryStringParameters.lon}`}&appid=${process.env.VITE_WEATHER_API_KEY}`;
-          console.log('Weather URL:', weatherUrl); // For debugging
           const weatherResponse = await fetch(weatherUrl);
           if (!weatherResponse.ok) {
-            throw new Error('Weather API response not ok');
+            throw new Error(`Weather API responded with status: ${weatherResponse.status}`);
           }
           const weatherData = await weatherResponse.json();
+          console.log('Weather data received:', weatherData);
+          
           return {
             statusCode: 200,
             headers: {
@@ -89,9 +96,13 @@ exports.handler = async (event) => {
               'Content-Type': 'application/json',
               'Access-Control-Allow-Origin': '*'
             },
-            body: JSON.stringify({ error: 'Weather service error', details: error.message })
+            body: JSON.stringify({ 
+              error: 'Weather service error', 
+              details: error.message,
+              url: weatherUrl 
+            })
           };
-        }        
+        }                                      
 
       case 'github':
         const githubResponse = await fetch('https://api.github.com/user/repos?per_page=100&page=1&type=all', {

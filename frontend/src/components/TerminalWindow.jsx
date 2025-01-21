@@ -85,19 +85,19 @@ export const TerminalWindow = ({ onCommand, isDark }) => {
           setInput('');
           return;
 
-          case 'social':
-            newHistory.push(
-              'Social Media Links',
-              '━━━━━━━━━━━━━━━',
-              '• GitHub:    https://github.com/Brio97',
-              '• LinkedIn:  https://linkedin.com/in/brian-mutai-158397202',
-              '• Twitter:   @yobrade20'
-            );
-            setHistory(newHistory);
-            setCommandHistory(prev => [...prev, input]);
-            setHistoryIndex(-1);
-            setInput('');
-            return;          
+        case 'social':
+          newHistory.push(
+            'Social Media Links',
+            '━━━━━━━━━━━━━━━',
+            '• GitHub:    https://github.com/Brio97',
+            '• LinkedIn:  https://linkedin.com/in/brian-mutai-158397202',
+            '• Twitter:   @yobrade20'
+          );
+          setHistory(newHistory);
+          setCommandHistory(prev => [...prev, input]);
+          setHistoryIndex(-1);
+          setInput('');
+          return;          
 
         case 'weather':
           setIsLoading(true);
