@@ -65,17 +65,33 @@ exports.handler = async (event) => {
         };
 
       case 'weather':
-        const weatherUrl = `https://api.openweathermap.org/data/2.5/weather?${event.queryStringParameters.q ? `q=${event.queryStringParameters.q}` : `lat=${event.queryStringParameters.lat}&lon=${event.queryStringParameters.lon}`}&appid=${process.env.VITE_WEATHER_API_KEY}`;
-        const weatherResponse = await fetch(weatherUrl);
-        const weatherData = await weatherResponse.json();
-        return {
-          statusCode: 200,
-          headers: {
-            'Content-Type': 'application/json',
-            'Access-Control-Allow-Origin': '*'
-          },
-          body: JSON.stringify(weatherData)
-        };
+        try {
+          const weatherUrl = `https://api.openweathermap.org/data/2.5/weather?${event.queryStringParameters.q ? `q=${event.queryStringParameters.q}` : `lat=${event.queryStringParameters.lat}&lon=${event.queryStringParameters.lon}`}&appid=${process.env.VITE_WEATHER_API_KEY}`;
+          console.log('Weather URL:', weatherUrl); // For debugging
+          const weatherResponse = await fetch(weatherUrl);
+          if (!weatherResponse.ok) {
+            throw new Error('Weather API response not ok');
+          }
+          const weatherData = await weatherResponse.json();
+          return {
+            statusCode: 200,
+            headers: {
+              'Content-Type': 'application/json',
+              'Access-Control-Allow-Origin': '*'
+            },
+            body: JSON.stringify(weatherData)
+          };
+        } catch (error) {
+          console.error('Weather API Error:', error);
+          return {
+            statusCode: 500,
+            headers: {
+              'Content-Type': 'application/json',
+              'Access-Control-Allow-Origin': '*'
+            },
+            body: JSON.stringify({ error: 'Weather service error', details: error.message })
+          };
+        }        
 
       case 'github':
         const githubResponse = await fetch('https://api.github.com/user/repos?per_page=100&page=1&type=all', {

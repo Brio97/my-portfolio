@@ -85,18 +85,19 @@ export const TerminalWindow = ({ onCommand, isDark }) => {
           setInput('');
           return;
 
-        case 'social':
-          newHistory.push(
-            'Social Media Links:',
-            '• GitHub: https://github.com/Brio97',
-            '• LinkedIn: https://linkedin.com/in/brian-mutai-158397202' ,
-            '• Twitter: @yobrade20'
-          );
-          setHistory(newHistory);
-          setCommandHistory(prev => [...prev, input]);
-          setHistoryIndex(-1);
-          setInput('');
-          return;
+          case 'social':
+            newHistory.push(
+              'Social Media Links',
+              '━━━━━━━━━━━━━━━',
+              '• GitHub:    https://github.com/Brio97',
+              '• LinkedIn:  https://linkedin.com/in/brian-mutai-158397202',
+              '• Twitter:   @yobrade20'
+            );
+            setHistory(newHistory);
+            setCommandHistory(prev => [...prev, input]);
+            setHistoryIndex(-1);
+            setInput('');
+            return;          
 
         case 'weather':
           setIsLoading(true);
@@ -205,17 +206,27 @@ export const TerminalWindow = ({ onCommand, isDark }) => {
 
   const HistoryList = ({ items }) => (
     <FixedSizeList
-      height={200}
+      height={256}  // Increased from 200 to match container
       itemCount={items.length}
-      itemSize={35}
+      itemSize={64}  // Increased for comfortable multi-line content
       width="100%"
       className={isDark ? 'text-green-400' : 'text-green-600'}
     >
       {({ index, style }) => (
-        <div style={style} className="mb-1">{items[index]}</div>
+        <div 
+          style={{ 
+            ...style, 
+            whiteSpace: 'pre-wrap', 
+            lineHeight: '1.5',
+            padding: '8px 0'
+          }} 
+          className="mb-1"
+        >
+          {items[index]}
+        </div>
       )}
     </FixedSizeList>
-  );
+  );    
 
   useEffect(() => {
     inputRef.current?.focus();
@@ -234,7 +245,7 @@ export const TerminalWindow = ({ onCommand, isDark }) => {
         </div>
         <span className={isDark ? 'text-gray-400' : 'text-gray-600'}>portfolio-terminal</span>
       </div>
-      <div className="h-48 overflow-auto mb-2">
+      <div className="h-64 overflow-auto mb-2">
         <HistoryList items={history} />
       </div>
       {isLoading && (
