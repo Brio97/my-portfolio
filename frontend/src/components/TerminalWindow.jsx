@@ -60,6 +60,24 @@ export const TerminalWindow = ({ onCommand, isDark }) => {
   const handleCommand = async (e) => {
     if (e.key === 'Enter' && input.trim()) {
       const newHistory = [...history, `> ${input}`];
+      
+      // Direct handling of help and clear commands
+      const trimmedInput = input.toLowerCase().trim();
+      if (trimmedInput === 'help') {
+        newHistory.push('Available commands:', ...Object.entries(commands).map(([cmd, desc]) => `${cmd}: ${desc}`));
+        setHistory(newHistory);
+        setCommandHistory(prev => [...prev, input]);
+        setHistoryIndex(-1);
+        setInput('');
+        return;
+      }
+
+      if (trimmedInput === 'clear') {
+        setHistory([]);
+        setInput('');
+        return;
+      }
+
       setIsLoading(true);
       
       try {
@@ -70,7 +88,7 @@ export const TerminalWindow = ({ onCommand, isDark }) => {
             q: input.toLowerCase().trim(),
             target: 'en'
           })
-        });        
+        });
   
         const data = await response.json();
         const translatedText = data.data.translations[0].translatedText.toLowerCase().trim();
@@ -85,15 +103,6 @@ export const TerminalWindow = ({ onCommand, isDark }) => {
         ) || translatedText;
       
         switch(cmd) {
-          case 'help':
-            newHistory.push('Available commands:', ...Object.entries(commands).map(([cmd, desc]) => `${cmd}: ${desc}`));
-            break;
-
-          case 'clear':
-            setHistory([]);
-            setInput('');
-            return;
-
           case 'time':
             newHistory.push(new Date().toLocaleTimeString());
             break;
@@ -111,12 +120,12 @@ export const TerminalWindow = ({ onCommand, isDark }) => {
                 setUserLocation(locationData);
               }
               
-              const response = await fetch(`/api/weather?lat=${locationData.lat}&lon=${locationData.lon}&appid=${import.meta.env.VITE_WEATHER_API_KEY}`);
+              const response = await fetch(`/.netlify/functions/api/weather?lat=${locationData.lat}&lon=${locationData.lon}&appid=${import.meta.env.VITE_WEATHER_API_KEY}`);
               const data = await response.json();
               newHistory.push(`Current weather in ${locationData.city}: ${data.weather[0].main}, ${Math.round(data.main.temp - 273.15)}°C`);
             } catch (error) {
               try {
-                const response = await fetch(`/api/weather?q=Nairobi&appid=${import.meta.env.VITE_WEATHER_API_KEY}`);
+                const response = await fetch(`/.netlify/functions/api/weather?q=Nairobi&appid=${import.meta.env.VITE_WEATHER_API_KEY}`);
                 const data = await response.json();
                 newHistory.push(`Current weather in Nairobi: ${data.weather[0].main}, ${Math.round(data.main.temp - 273.15)}°C`);
               } catch (fallbackError) {
