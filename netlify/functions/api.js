@@ -1,7 +1,7 @@
-import fetch from 'node-fetch';
-import { createTransport } from 'nodemailer';
+const fetch = require('node-fetch');
+const nodemailer = require('nodemailer');
 
-const transporter = createTransport({
+const transporter = nodemailer.createTransport({
   service: 'gmail',
   auth: {
     user: process.env.EMAIL_USER,
@@ -9,30 +9,30 @@ const transporter = createTransport({
   }
 });
 
-export async function handler(event) {
+exports.handler = async (event) => {
   const path = event.path.split('/').pop();
 
   try {
     switch (path) {
-        case 'contact':
-            const { name, email, message } = JSON.parse(event.body);
-            await transporter.sendMail({
-              from: process.env.EMAIL_USER,
-              to: process.env.EMAIL_USER,
-              subject: `Portfolio Contact from ${name}`,
-              text: `From: ${name}\nEmail: ${email}\n\nMessage:\n${message}`,
-              html: `<strong>From:</strong> ${name}<br>
-                     <strong>Email:</strong> ${email}<br><br>
-                     <strong>Message:</strong><br>${message}`
-            });
-            return {
-              statusCode: 200,
-              headers: {
-                'Content-Type': 'application/json',
-                'Access-Control-Allow-Origin': '*'
-              },
-              body: JSON.stringify({ message: 'Email sent successfully' })
-            };          
+      case 'contact':
+        const { name, email, message } = JSON.parse(event.body);
+        await transporter.sendMail({
+          from: process.env.EMAIL_USER,
+          to: process.env.EMAIL_USER,
+          subject: `Portfolio Contact from ${name}`,
+          text: `From: ${name}\nEmail: ${email}\n\nMessage:\n${message}`,
+          html: `<strong>From:</strong> ${name}<br>
+                 <strong>Email:</strong> ${email}<br><br>
+                 <strong>Message:</strong><br>${message}`
+        });
+        return {
+          statusCode: 200,
+          headers: {
+            'Content-Type': 'application/json',
+            'Access-Control-Allow-Origin': '*'
+          },
+          body: JSON.stringify({ message: 'Email sent successfully' })
+        };          
 
       case 'translate':
         const { q, target } = JSON.parse(event.body);
@@ -50,6 +50,18 @@ export async function handler(event) {
             'Access-Control-Allow-Origin': '*'
           },
           body: JSON.stringify(translateData)
+        };
+
+      case 'translate/languages':
+        const languagesResponse = await fetch(`https://translation.googleapis.com/language/translate/v2/languages?key=${process.env.VITE_GOOGLE_TRANSLATE_API_KEY}&target=en`);
+        const languagesData = await languagesResponse.json();
+        return {
+          statusCode: 200,
+          headers: {
+            'Content-Type': 'application/json',
+            'Access-Control-Allow-Origin': '*'
+          },
+          body: JSON.stringify(languagesData)
         };
 
       case 'weather':
@@ -94,5 +106,4 @@ export async function handler(event) {
       body: JSON.stringify({ error: error.message })
     };
   }
-}
-
+};

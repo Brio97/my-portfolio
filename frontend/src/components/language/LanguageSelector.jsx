@@ -22,7 +22,7 @@ export const LanguageSelector = ({ isDark }) => {
 
     const initializeLanguage = async () => {
       try {
-        const response = await fetch('/api/translate/languages');
+        const response = await fetch('/.netlify/functions/api/translate/languages');
         const data = await response.json();
         setAvailableLanguages(data.data.languages);
         
@@ -53,7 +53,7 @@ export const LanguageSelector = ({ isDark }) => {
           element.setAttribute('data-original', textToTranslate);
         }
   
-        const response = await fetch('/api/translate', {
+        const response = await fetch('/.netlify/functions/api/translate', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ q: textToTranslate, target: targetLang })
