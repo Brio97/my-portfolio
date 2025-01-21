@@ -63,14 +63,14 @@ export const TerminalWindow = ({ onCommand, isDark }) => {
       setIsLoading(true);
       
       try {
-        const response = await fetch('/api/translate', {
+        const response = await fetch('/.netlify/functions/api/translate', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ 
             q: input.toLowerCase().trim(),
             target: 'en'
           })
-        });
+        });        
   
         const data = await response.json();
         const translatedText = data.data.translations[0].translatedText.toLowerCase().trim();

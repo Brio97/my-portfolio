@@ -80,14 +80,14 @@ export const Portfolio = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      const response = await fetch('http://localhost:3000/api/contact', {
+      const response = await fetch('/.netlify/functions/api/contact', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
           'Accept': 'application/json',
         },
         body: JSON.stringify(formData)
-      });
+      });      
       
       if (response.ok) {
         setFormData({ name: '', email: '', message: '' });
