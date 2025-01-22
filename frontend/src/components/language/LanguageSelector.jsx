@@ -8,7 +8,26 @@ export const LanguageSelector = ({ isDark }) => {
   const { i18n } = useTranslation();
 
   useEffect(() => {
-    const observer = new MutationObserver((mutations) => {
+    const initializeLanguage = async () => {
+      try {
+        const response = await fetch('/.netlify/functions/api/translate/languages');
+        const data = await response.json();
+        setAvailableLanguages(data.data.languages);
+        
+        const savedLang = localStorage.getItem('selectedLanguage') || 'en';
+        if (savedLang) {
+          await translateContent(savedLang);
+          i18n.changeLanguage(savedLang);
+        }
+      } catch (error) {
+        console.log('Language detection fallback to English');
+        setAvailableLanguages([{ language: 'en', name: 'English' }]);
+      }
+    };
+
+    initializeLanguage();
+
+    const observer = new MutationObserver(() => {
       const currentLang = localStorage.getItem('selectedLanguage');
       if (currentLang) {
         translateContent(currentLang);
@@ -19,24 +38,6 @@ export const LanguageSelector = ({ isDark }) => {
       childList: true,
       subtree: true
     });
-
-    const initializeLanguage = async () => {
-      try {
-        const response = await fetch('/.netlify/functions/api/translate/languages');
-        const data = await response.json();
-        setAvailableLanguages(data.data.languages);
-        
-        const savedLang = localStorage.getItem('selectedLanguage');
-        if (savedLang) {
-          await translateContent(savedLang);
-          i18n.changeLanguage(savedLang);
-        }
-      } catch (error) {
-        console.log('Language detection fallback to English');
-      }
-    };
-
-    initializeLanguage();
 
     return () => observer.disconnect();
   }, [i18n]);
@@ -59,6 +60,10 @@ export const LanguageSelector = ({ isDark }) => {
           body: JSON.stringify({ q: textToTranslate, target: targetLang })
         });
   
+        if (!response.ok) {
+          throw new Error('Translation request failed');
+        }
+
         const data = await response.json();
         const translatedText = data.data.translations[0].translatedText;
   
