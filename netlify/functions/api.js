@@ -1,36 +1,65 @@
 const contactHandler = require('./handlers/contactHandler');
 const translateHandler = require('./handlers/translateHandler');
-const languagesHandler = require('./handlers/languagesHandler').default;
+const languagesHandler = require('./handlers/languagesHandler');
 const weatherHandler = require('./handlers/weatherHandler');
 const githubHandler = require('./handlers/githubHandler');
 const locationHandler = require('./handlers/locationHandler');
 
-exports.handler = async (event) => {
-  const fullPath = event.path.replace('/.netlify/functions/api/', '');
+exports.handler = async (event, context) => {
+  // Enable CORS
+  const headers = {
+    'Access-Control-Allow-Origin': '*',
+    'Access-Control-Allow-Headers': 'Content-Type',
+    'Access-Control-Allow-Methods': 'GET, POST, OPTIONS'
+  };
+
+  // Handle preflight requests
+  if (event.httpMethod === 'OPTIONS') {
+    return {
+      statusCode: 200,
+      headers
+    };
+  }
+
+  const path = event.path.replace('/.netlify/functions/api/', '');
 
   try {
-    switch (fullPath) {
+    let response;
+    switch (path) {
       case 'contact':
-        return await contactHandler(event);
+        response = await contactHandler(event);
+        break;
       case 'translate':
-        return await translateHandler(event);
+        response = await translateHandler(event);
+        break;
       case 'translate/languages':
-        return await languagesHandler(event);
+        response = await languagesHandler(event);
+        break;
       case 'weather':
-        return await weatherHandler(event);
+        response = await weatherHandler(event);
+        break;
       case 'github':
-        return await githubHandler(event);
+        response = await githubHandler(event);
+        break;
       case 'location':
-        return await locationHandler(event);
+        response = await locationHandler(event);
+        break;
       default:
         return {
           statusCode: 404,
-          body: JSON.stringify({ error: 'Not Found', path: fullPath })
+          headers,
+          body: JSON.stringify({ error: 'Not Found' })
         };
     }
+
+    return {
+      ...response,
+      headers: { ...headers, ...response.headers }
+    };
   } catch (error) {
     return {
       statusCode: 500,
+      headers,
       body: JSON.stringify({ error: error.message })
     };
   }

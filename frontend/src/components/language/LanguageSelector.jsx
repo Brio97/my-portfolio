@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Globe } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 
-const BASE_URL = import.meta.env.DEV ? 'http://localhost:8888' : '';
+const BASE_URL = '/.netlify/functions/api';
 
 export const LanguageSelector = ({ isDark }) => {
   const [isOpen, setIsOpen] = useState(false);
@@ -12,7 +12,7 @@ export const LanguageSelector = ({ isDark }) => {
   useEffect(() => {
     const initializeLanguage = async () => {
       try {
-        const response = await fetch('/api/translate/languages');
+        const response = await fetch(`${BASE_URL}/translate/languages`);
         if (!response.ok) {
           throw new Error(`HTTP error! status: ${response.status}`);
         }
@@ -57,7 +57,7 @@ export const LanguageSelector = ({ isDark }) => {
           element.setAttribute('data-original', textToTranslate);
         }
   
-        const response = await fetch(`/api/translate`, {
+        const response = await fetch(`${BASE_URL}/translate`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ q: textToTranslate, target: targetLang })

@@ -1,21 +1,22 @@
-const fetch = (await import('node-fetch')).default;
+const fetch = require('node-fetch');
 
-const githubHandler = async () => {
-  const githubResponse = await fetch('https://api.github.com/user/repos?per_page=100&page=1&type=all', {
-    headers: {
-      'Authorization': `token ${process.env.VITE_GITHUB_TOKEN}`,
-      'Accept': 'application/vnd.github.v3+json'
-    }
-  });
-  const githubData = await githubResponse.json();
-  
+const githubHandler = async (event) => {
+  const token = process.env.VITE_GITHUB_TOKEN;
+  const headers = {
+    Authorization: `Bearer ${token}`,
+    'Content-Type': 'application/json',
+  };
+
+  const response = await fetch('https://api.github.com/user/repos', { headers });
+  const data = await response.json();
+
   return {
     statusCode: 200,
     headers: {
       'Content-Type': 'application/json',
       'Access-Control-Allow-Origin': '*'
     },
-    body: JSON.stringify(githubData)
+    body: JSON.stringify(data)
   };
 };
 
