@@ -11,19 +11,21 @@ export const LanguageSelector = ({ isDark }) => {
     const initializeLanguage = async () => {
       try {
         const response = await fetch('/.netlify/functions/api/translate/languages');
+        if (!response.ok) {
+          throw new Error('Failed to fetch languages');
+        }
         const data = await response.json();
+        console.log('Available languages:', data); // Debug the response
         setAvailableLanguages(data.data.languages);
         
         const savedLang = localStorage.getItem('selectedLanguage') || 'en';
-        if (savedLang) {
-          await translateContent(savedLang);
-          i18n.changeLanguage(savedLang);
-        }
+        await translateContent(savedLang);
+        i18n.changeLanguage(savedLang);
       } catch (error) {
-        console.log('Language detection fallback to English');
+        console.log('Language fetch error:', error);
         setAvailableLanguages([{ language: 'en', name: 'English' }]);
       }
-    };
+    };    
 
     initializeLanguage();
 
