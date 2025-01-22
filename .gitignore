@@ -1,3 +1,5 @@
 frontend/.env
 backend/.env
 .db
+# Local Netlify folder
+.netlify

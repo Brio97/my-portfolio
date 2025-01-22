@@ -3,6 +3,40 @@ import { FixedSizeList } from 'react-window';
 import { getLocationDetails } from '../services/location';
 import Logo from '/src/assets/portfolio-logo.webp';
 
+const API_BASE = '/.netlify/functions/api';
+
+const apiRequest = async (endpoint, options = {}) => {
+  try {
+    const response = await fetch(`${API_BASE}/${endpoint}`, {
+      ...options,
+      headers: {
+        'Content-Type': 'application/json',
+        'Accept': 'application/json',
+        ...options.headers
+      }
+    });
+    
+    const text = await response.text();
+    let data;
+    
+    try {
+      data = JSON.parse(text);
+    } catch (e) {
+      console.error('Response parsing failed:', text);
+      throw new Error(`Server response error: ${text.substring(0, 100)}`);
+    }
+    
+    if (!response.ok) {
+      throw new Error(data.error || `API Error: ${response.status}`);
+    }
+    
+    return data;
+  } catch (error) {
+    console.error(`${endpoint} request failed:`, error);
+    throw error;
+  }
+};
+
 export const TerminalWindow = ({ onCommand, isDark }) => {
   const [input, setInput] = useState('');
   const [history, setHistory] = useState([
@@ -57,129 +91,121 @@ export const TerminalWindow = ({ onCommand, isDark }) => {
     });
   };
 
+  const handleSocialCommand = (newHistory) => {
+    newHistory.push(
+      'Social Media Links',
+      '━━━━━━━━━━━━━━━',
+      '• GitHub:    https://github.com/Brio97',
+      '• LinkedIn:  https://linkedin.com/in/brian-mutai-158397202',
+      '• Twitter:   @yobrade20'
+    );
+    return newHistory;
+  };
+
+  const handleWeatherCommand = async (newHistory) => {
+    newHistory.push('Fetching weather data...');
+    try {
+      if (!userLocation) {
+        const position = await getLocationWithTimeout();
+        const locationData = await getLocationDetails(
+          position.coords.latitude,
+          position.coords.longitude
+        );
+        setUserLocation(locationData);
+      }
+
+      const query = userLocation 
+        ? `weather?lat=${userLocation.lat}&lon=${userLocation.lon}`
+        : 'weather?q=Nairobi';
+      
+      const data = await apiRequest(query);
+      
+      if (!data || !data.weather) {
+        throw new Error('Invalid weather data received');
+      }
+
+      const location = userLocation?.city || 'Nairobi';
+      const temp = Math.round(data.main.temp);
+      const description = data.weather[0].description;
+      
+      newHistory.push(
+        `Current weather in ${location}:`,
+        `${temp}°C - ${description}`
+      );
+    } catch (error) {
+      console.error('Weather error:', error);
+      newHistory.push('Unable to fetch weather data. Please try again later.');
+    }
+    return newHistory;
+  };
+
+  const handleTranslation = async (input, newHistory) => {
+    try {
+      const data = await apiRequest('translate', {
+        method: 'POST',
+        body: JSON.stringify({ q: input, target: 'en' })
+      });
+
+      const translatedText = data.data.translations[0].translatedText.toLowerCase().trim();
+      return findAndExecuteCommand(translatedText, newHistory);
+    } catch (error) {
+      return findAndExecuteCommand(input, newHistory);
+    }
+  };
+
+  const findAndExecuteCommand = (text, newHistory) => {
+    const words = text.split(/\s+/);
+    const cmd = Object.keys(commands).find(command => 
+      words.some(word => word === command || word.includes(command))
+    ) || text;
+
+    if (Object.keys(commands).includes(cmd)) {
+      onCommand(cmd);
+      newHistory.push(`Executing: ${cmd}`);
+    } else {
+      newHistory.push(`Command not recognized: ${text}`);
+    }
+    return newHistory;
+  };
+
   const handleCommand = async (e) => {
     if (e.key === 'Enter' && input.trim()) {
       const newHistory = [...history, `> ${input}`];
       const trimmedInput = input.toLowerCase().trim();
 
-      // Direct command handling
-      switch(trimmedInput) {
-        case 'help':
-          newHistory.push('Available commands:', ...Object.entries(commands).map(([cmd, desc]) => `${cmd}: ${desc}`));
-          setHistory(newHistory);
-          setCommandHistory(prev => [...prev, input]);
-          setHistoryIndex(-1);
-          setInput('');
-          return;
-
-        case 'clear':
-          setHistory([]);
-          setInput('');
-          return;
-
-        case 'time':
-          newHistory.push(new Date().toLocaleTimeString());
-          setHistory(newHistory);
-          setCommandHistory(prev => [...prev, input]);
-          setHistoryIndex(-1);
-          setInput('');
-          return;
-
-        case 'social':
-          newHistory.push(
-            'Social Media Links',
-            '━━━━━━━━━━━━━━━',
-            '• GitHub:    https://github.com/Brio97',
-            '• LinkedIn:  https://linkedin.com/in/brian-mutai-158397202',
-            '• Twitter:   @yobrade20'
-          );
-          setHistory(newHistory);
-          setCommandHistory(prev => [...prev, input]);
-          setHistoryIndex(-1);
-          setInput('');
-          return;          
-
-        case 'weather':
-          setIsLoading(true);
-          newHistory.push('Fetching weather data...');
-          try {
-            let locationData = userLocation;
-            if (!locationData) {
-              const position = await getLocationWithTimeout();
-              locationData = await getLocationDetails(
-                position.coords.latitude,
-                position.coords.longitude
-              );
-              setUserLocation(locationData);
-            }
-            
-            const response = await fetch(`/.netlify/functions/api/weather?lat=${locationData.lat}&lon=${locationData.lon}&appid=${import.meta.env.VITE_WEATHER_API_KEY}`);
-            const data = await response.json();
-            newHistory.push(`Current weather in ${locationData.city}: ${data.weather[0].main}, ${Math.round(data.main.temp - 273.15)}°C`);
-          } catch (error) {
-            try {
-              const response = await fetch(`/.netlify/functions/api/weather?q=Nairobi&appid=${import.meta.env.VITE_WEATHER_API_KEY}`);
-              const data = await response.json();
-              newHistory.push(`Current weather in Nairobi: ${data.weather[0].main}, ${Math.round(data.main.temp - 273.15)}°C`);
-            } catch (fallbackError) {
-              newHistory.push('Weather service temporarily unavailable');
-            }
-          } finally {
-            setIsLoading(false);
-          }
-          setHistory(newHistory);
-          setCommandHistory(prev => [...prev, input]);
-          setHistoryIndex(-1);
-          setInput('');
-          return;
-      }
-
-      // Handle other commands with translation
       setIsLoading(true);
       try {
-        const response = await fetch('/.netlify/functions/api/translate', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ 
-            q: trimmedInput,
-            target: 'en'
-          })
-        });
-  
-        const data = await response.json();
-        const translatedText = data.data.translations[0].translatedText.toLowerCase().trim();
-        
-        const words = translatedText.split(/\s+/);
-        const cmd = Object.keys(commands).find(command => 
-          words.some(word => 
-            word === command || 
-            word.includes(command) || 
-            command.includes(word)
-          )
-        ) || translatedText;
-
-        if (Object.keys(commands).includes(cmd)) {
-          onCommand(cmd);
-          newHistory.push(`Executing: ${cmd}`);
-        } else {
-          newHistory.push(`Command not recognized: ${input}`);
+        switch(trimmedInput) {
+          case 'help':
+            newHistory.push('Available commands:', ...Object.entries(commands).map(([cmd, desc]) => `${cmd}: ${desc}`));
+            break;
+          case 'clear':
+            setHistory([]);
+            setInput('');
+            setIsLoading(false);
+            return;
+          case 'time':
+            newHistory.push(new Date().toLocaleTimeString());
+            break;
+          case 'social':
+            handleSocialCommand(newHistory);
+            break;
+          case 'weather':
+            await handleWeatherCommand(newHistory);
+            break;
+          default:
+            await handleTranslation(trimmedInput, newHistory);
         }
       } catch (error) {
-        const directCmd = trimmedInput;
-        if (Object.keys(commands).includes(directCmd)) {
-          onCommand(directCmd);
-          newHistory.push(`Executing: ${directCmd}`);
-        } else {
-          newHistory.push(`Command not recognized: ${input}`);
-        }
+        console.error('Command error:', error);
+        newHistory.push('An error occurred. Please try again.');
       } finally {
         setIsLoading(false);
+        setHistory(newHistory);
+        setCommandHistory(prev => [...prev, input]);
+        setHistoryIndex(-1);
+        setInput('');
       }
-      
-      setHistory(newHistory);
-      setCommandHistory(prev => [...prev, input]);
-      setHistoryIndex(-1);
-      setInput('');
     }
 
     if (e.key === 'ArrowUp') {
@@ -206,9 +232,9 @@ export const TerminalWindow = ({ onCommand, isDark }) => {
 
   const HistoryList = ({ items }) => (
     <FixedSizeList
-      height={256}  // Increased from 200 to match container
+      height={256}
       itemCount={items.length}
-      itemSize={64}  // Increased for comfortable multi-line content
+      itemSize={64}
       width="100%"
       className={isDark ? 'text-green-400' : 'text-green-600'}
     >

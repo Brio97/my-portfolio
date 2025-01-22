@@ -2,6 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { Globe } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 
+const BASE_URL = import.meta.env.DEV ? 'http://localhost:8888' : '';
+
 export const LanguageSelector = ({ isDark }) => {
   const [isOpen, setIsOpen] = useState(false);
   const [availableLanguages, setAvailableLanguages] = useState([]);
@@ -10,22 +12,21 @@ export const LanguageSelector = ({ isDark }) => {
   useEffect(() => {
     const initializeLanguage = async () => {
       try {
-        const response = await fetch('/.netlify/functions/api/translate/languages');
+        const response = await fetch('/api/translate/languages');
         if (!response.ok) {
-          throw new Error('Failed to fetch languages');
+          throw new Error(`HTTP error! status: ${response.status}`);
         }
         const data = await response.json();
-        console.log('Available languages:', data); // Debug the response
         setAvailableLanguages(data.data.languages);
         
         const savedLang = localStorage.getItem('selectedLanguage') || 'en';
         await translateContent(savedLang);
         i18n.changeLanguage(savedLang);
       } catch (error) {
-        console.log('Language fetch error:', error);
+        console.error('Language detection fallback to English:', error);
         setAvailableLanguages([{ language: 'en', name: 'English' }]);
       }
-    };    
+    };
 
     initializeLanguage();
 
@@ -56,7 +57,7 @@ export const LanguageSelector = ({ isDark }) => {
           element.setAttribute('data-original', textToTranslate);
         }
   
-        const response = await fetch('/.netlify/functions/api/translate', {
+        const response = await fetch(`/api/translate`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ q: textToTranslate, target: targetLang })
@@ -76,7 +77,7 @@ export const LanguageSelector = ({ isDark }) => {
         }
       }
     } catch (error) {
-      console.log('Translation service temporarily unavailable');
+      console.error('Translation service temporarily unavailable:', error);
     }
   };  
 
@@ -100,7 +101,9 @@ export const LanguageSelector = ({ isDark }) => {
       </button>
       
       {isOpen && availableLanguages.length > 0 && (
-        <div className={`absolute top-full right-0 mt-2 py-2 w-48 rounded-lg shadow-lg ${isDark ? 'bg-gray-800' : 'bg-white'} z-[100] max-h-60 overflow-y-auto`}>
+        <div className={`absolute top-full right-0 mt-2 py-2 w-48 rounded-lg shadow-lg ${
+          isDark ? 'bg-gray-800' : 'bg-white'
+        } z-[100] max-h-60 overflow-y-auto`}>
           {availableLanguages.map((lang) => (
             <button
               key={lang.language}
