@@ -1,43 +1,44 @@
 const fetch = require('node-fetch');
 
 const handler = async (event) => {
-  try {
-    const { lat, lon } = JSON.parse(event.body);
+  const { lat, lon, q } = event.queryStringParameters;
+  const API_KEY = process.env.VITE_WEATHER_API_KEY;
+  
+  let weatherUrl;
+  if (lat && lon) {
+    weatherUrl = `https://api.openweathermap.org/data/2.5/weather?lat=${lat}&lon=${lon}&appid=${API_KEY}&units=metric`;
+  } else {
+    weatherUrl = `https://api.openweathermap.org/data/2.5/weather?q=${q || 'Nairobi'}&appid=${API_KEY}&units=metric`;
+  }
 
-    // First get location details from BigDataCloud API
-    const locationResponse = await fetch(
-      `https://api-bdc.io/data/reverse-geocode-client?latitude=${lat}&longitude=${lon}&localityLanguage=en`
-    );
-    const locationData = await locationResponse.json();
-    const city = locationData.city || locationData.locality || 'Unknown Location';
+  const response = await fetch(weatherUrl);
+  const data = await response.json();
 
-    // Then get weather data using the same coordinates
-    const weatherResponse = await fetch(
-      `https://api.openweathermap.org/data/2.5/weather?lat=${lat}&lon=${lon}&appid=${process.env.VITE_WEATHER_API_KEY}&units=metric`
-    );
-    const weatherData = await weatherResponse.json();
-
+  if (data.cod !== 200) {
     return {
-      statusCode: 200,
+      statusCode: 400,
       headers: {
         'Content-Type': 'application/json',
         'Access-Control-Allow-Origin': '*'
       },
       body: JSON.stringify({
-        ...weatherData,
-        city
+        error: data.message || 'Weather data not available'
       })
     };
-  } catch (error) {
-    return {
-      statusCode: 500,
-      headers: {
-        'Content-Type': 'application/json',
-        'Access-Control-Allow-Origin': '*'
-      },
-      body: JSON.stringify({ error: error.message })
-    };
   }
+
+  return {
+    statusCode: 200,
+    headers: {
+      'Content-Type': 'application/json',
+      'Access-Control-Allow-Origin': '*'
+    },
+    body: JSON.stringify({
+      weather: data.weather,
+      main: data.main,
+      name: data.name
+    })
+  };
 };
 
 module.exports = handler;

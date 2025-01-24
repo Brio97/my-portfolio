@@ -113,7 +113,7 @@ export const TerminalWindow = ({ onCommand, isDark }) => {
         );
         setUserLocation(locationData);
       }
-
+  
       const query = userLocation 
         ? `weather?lat=${userLocation.lat}&lon=${userLocation.lon}`
         : 'weather?q=Nairobi';
@@ -123,7 +123,7 @@ export const TerminalWindow = ({ onCommand, isDark }) => {
       if (!data || !data.weather) {
         throw new Error('Invalid weather data received');
       }
-
+  
       const location = userLocation?.city || 'Nairobi';
       const temp = Math.round(data.main.temp);
       const description = data.weather[0].description;
@@ -137,7 +137,7 @@ export const TerminalWindow = ({ onCommand, isDark }) => {
       newHistory.push('Unable to fetch weather data. Please try again later.');
     }
     return newHistory;
-  };
+  };  
 
   const handleTranslation = async (input, newHistory) => {
     try {
