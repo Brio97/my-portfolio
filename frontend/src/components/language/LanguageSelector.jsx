@@ -92,23 +92,23 @@ export const LanguageSelector = ({ isDark }) => {
     <div className="relative">
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className={`p-2 ${isDark ? 'hover:bg-gray-800' : 'hover:bg-gray-100'} rounded-lg transition-colors flex items-center`}
+        className={`p-1 sm:p-2 ${isDark ? 'hover:bg-gray-800' : 'hover:bg-gray-100'} rounded-lg transition-colors flex items-center`}
       >
-        <Globe size={20} className={isDark ? 'text-white' : 'text-gray-700'} />
-        <span className="ml-2 text-sm">
+        <Globe size={18} className={isDark ? 'text-white' : 'text-gray-700'} />
+        <span className="ml-1 sm:ml-2 text-xs sm:text-sm">
           {i18n.language.toUpperCase()}
         </span>
       </button>
       
       {isOpen && availableLanguages.length > 0 && (
-        <div className={`absolute top-full right-0 mt-2 py-2 w-48 rounded-lg shadow-lg ${
+        <div className={`absolute left-0 sm:right-0 mt-2 py-2 w-40 sm:w-48 rounded-lg shadow-lg ${
           isDark ? 'bg-gray-800' : 'bg-white'
         } z-[100] max-h-60 overflow-y-auto`}>
           {availableLanguages.map((lang) => (
             <button
               key={lang.language}
               onClick={() => handleLanguageChange(lang.language)}
-              className={`w-full text-left px-4 py-2 ${
+              className={`w-full text-left px-3 sm:px-4 py-2 text-sm ${
                 i18n.language === lang.language 
                   ? 'bg-blue-500 text-white' 
                   : isDark 
@@ -122,5 +122,5 @@ export const LanguageSelector = ({ isDark }) => {
         </div>
       )}
     </div>
-  );
+  );  
 };
