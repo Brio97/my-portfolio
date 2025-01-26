@@ -4,6 +4,7 @@ const languagesHandler = require('./handlers/languagesHandler');
 const weatherHandler = require('./handlers/weatherHandler');
 const githubHandler = require('./handlers/githubHandler');
 const locationHandler = require('./handlers/locationHandler');
+const hashnodeHandler = require('./handlers/hashnodeHandler');
 
 exports.handler = async (event, context) => {
   // Enable CORS
@@ -44,6 +45,9 @@ exports.handler = async (event, context) => {
       case 'location':
         response = await locationHandler(event);
         break;
+      case 'hashnode':
+        response = await hashnodeHandler(event);
+        break
       default:
         return {
           statusCode: 404,
