@@ -117,56 +117,54 @@ export const Portfolio = () => {
               src={Logo} 
               alt="Brand Logo" 
               onClick={() => handleSectionChange('home')}
-              className="w-10 h-10 cursor-pointer hover:opacity-80 transition-opacity"
+              className="w-8 h-8 sm:w-10 sm:h-10 cursor-pointer hover:opacity-80 transition-opacity"
             />
-            <div className="flex space-x-6">
+            <div className="flex items-center space-x-2 sm:space-x-6">
               <LanguageSelector isDark={isDarkTheme} />
               <button
                 onClick={() => handleSectionChange('home')}
-                className={`p-2 ${isDarkTheme ? 'hover:bg-gray-800' : 'hover:bg-gray-100'} rounded-lg transition-colors`}
+                className={`p-1 sm:p-2 ${isDarkTheme ? 'hover:bg-gray-800' : 'hover:bg-gray-100'} rounded-lg transition-colors`}
                 title="Home"
               >
-                <HomeIcon size={20} className={isDarkTheme ? 'text-white' : 'text-gray-700'} />
+                <HomeIcon size={18} className={isDarkTheme ? 'text-white' : 'text-gray-700'} />
               </button>
-              <ThemeToggle 
-                isDark={isDarkTheme} 
-                onToggle={() => setIsDarkTheme(!isDarkTheme)} 
-              />
+              <ThemeToggle isDark={isDarkTheme} onToggle={() => setIsDarkTheme(!isDarkTheme)} />
               <button
                 onClick={() => setShowTerminal(!showTerminal)}
-                className={`p-2 ${isDarkTheme ? 'hover:bg-gray-800' : 'hover:bg-gray-100'} rounded-lg transition-colors`}
+                className={`p-1 sm:p-2 ${isDarkTheme ? 'hover:bg-gray-800' : 'hover:bg-gray-100'} rounded-lg transition-colors`}
                 title="Open Terminal"
               >
-                <Terminal size={20} className={isDarkTheme ? 'text-white' : 'text-gray-700'} />
+                <Terminal size={18} className={isDarkTheme ? 'text-white' : 'text-gray-700'} />
               </button>
               <button
                 onClick={() => handleSectionChange('projects')}
-                className={`p-2 ${isDarkTheme ? 'hover:bg-gray-800' : 'hover:bg-gray-100'} rounded-lg transition-colors`}
+                className={`p-1 sm:p-2 ${isDarkTheme ? 'hover:bg-gray-800' : 'hover:bg-gray-100'} rounded-lg transition-colors`}
                 title="Projects"
               >
-                <Code size={20} className={isDarkTheme ? 'text-white' : 'text-gray-700'} />
+                <Code size={18} className={isDarkTheme ? 'text-white' : 'text-gray-700'} />
               </button>
               <button
                 onClick={() => handleSectionChange('skills')}
-                className={`p-2 ${isDarkTheme ? 'hover:bg-gray-800' : 'hover:bg-gray-100'} rounded-lg transition-colors`}
+                className={`p-1 sm:p-2 ${isDarkTheme ? 'hover:bg-gray-800' : 'hover:bg-gray-100'} rounded-lg transition-colors`}
                 title="Skills"
               >
-                <Box size={20} className={isDarkTheme ? 'text-white' : 'text-gray-700'} />
+                <Box size={18} className={isDarkTheme ? 'text-white' : 'text-gray-700'} />
               </button>
             </div>
           </div>
         </nav>
       </header>
-
-      <main className="relative pt-20 min-h-screen w-full">
+  
+      <main className="relative pt-16 sm:pt-20 min-h-screen w-full">
         {showTerminal && (
-          <div className="fixed top-24 right-4 w-96 max-w-[90vw] z-50">
+          <div className="fixed top-20 sm:top-24 right-2 sm:right-4 w-[90vw] sm:w-96 max-w-[90vw] z-50">
             <TerminalWindow onCommand={handleCommand} isDark={isDarkTheme} />
           </div>
         )}
-
-        <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-12">
+  
+        <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12">
           <AnimatePresence mode="wait">
+            {/* Home Section */}
             {activeSection === 'home' && (
               <motion.div
                 key="home"
@@ -174,14 +172,16 @@ export const Portfolio = () => {
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, y: -20 }}
                 transition={{ duration: 0.3 }}
+                className="max-w-4xl mx-auto"
               >
                 <Home isDark={isDarkTheme} />
-                <div className="mt-8 flex justify-center">
+                <div className="mt-6 sm:mt-8 flex justify-center">
                   <ResumeButton isDark={isDarkTheme} />
                 </div>
               </motion.div>
             )}
-
+  
+            {/* About Section */}
             {activeSection === 'about' && (
               <motion.div
                 key="about"
@@ -189,17 +189,20 @@ export const Portfolio = () => {
                 animate={{ opacity: 1, x: 0 }}
                 exit={{ opacity: 0, x: -20 }}
                 transition={{ duration: 0.3 }}
-                className="max-w-4xl mx-auto"
+                className="max-w-4xl mx-auto px-4 sm:px-0"
               >
-                <h2 data-translate className={`text-3xl font-bold mb-8 ${isDarkTheme ? 'text-white' : 'text-gray-800'}`}>About Me</h2>
-                <div className={`${isDarkTheme ? 'bg-gray-800/50' : 'bg-white'} shadow-lg backdrop-blur-sm rounded-lg p-6`}>
+                <h2 data-translate className={`text-2xl sm:text-3xl font-bold mb-6 sm:mb-8 ${isDarkTheme ? 'text-white' : 'text-gray-800'}`}>
+                  About Me
+                </h2>
+                <div className={`${isDarkTheme ? 'bg-gray-800/50' : 'bg-white'} shadow-lg backdrop-blur-sm rounded-lg p-4 sm:p-6`}>
                   <p data-translate className={`leading-relaxed ${isDarkTheme ? 'text-gray-300' : 'text-gray-700'}`}>
                     I'm a Full Stack Developer with a strong background in Insurance Risk Analysis. My unique blend of technical skills and insurance industry expertise allows me to create innovative solutions that bridge both worlds.
                   </p>
                 </div>
               </motion.div>
             )}
-
+  
+            {/* Experience Section */}
             {activeSection === 'experience' && (
               <motion.div
                 key="experience"
@@ -207,19 +210,25 @@ export const Portfolio = () => {
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, y: 20 }}
                 transition={{ duration: 0.3 }}
-                className="max-w-4xl mx-auto"
+                className="max-w-4xl mx-auto px-4 sm:px-0"
               >
-                <h2 data-translate className={`text-3xl font-bold mb-8 ${isDarkTheme ? 'text-white' : 'text-gray-800'}`}>Experience</h2>
-                <div className="space-y-8">
+                <h2 data-translate className={`text-2xl sm:text-3xl font-bold mb-6 sm:mb-8 ${isDarkTheme ? 'text-white' : 'text-gray-800'}`}>
+                  Experience
+                </h2>
+                <div className="space-y-6 sm:space-y-8">
                   {experience.map((job, index) => (
-                    <div key={index} className={`${isDarkTheme ? 'bg-gray-800/50' : 'bg-white'} shadow-lg backdrop-blur-sm rounded-lg p-6 transform transition-all duration-300 hover:scale-105`}>
-                      <h3 data-translate className="text-xl font-bold text-blue-600">{job.title}</h3>
-                      <p data-translate className={`mb-4 ${isDarkTheme ? 'text-gray-300' : 'text-gray-700'}`}>{job.company} • {job.period}</p>
+                    <div key={index} className={`${isDarkTheme ? 'bg-gray-800/50' : 'bg-white'} shadow-lg backdrop-blur-sm rounded-lg p-4 sm:p-6 transform transition-all duration-300 hover:scale-105`}>
+                      <h3 data-translate className="text-lg sm:text-xl font-bold text-blue-600">{job.title}</h3>
+                      <p data-translate className={`mb-4 ${isDarkTheme ? 'text-gray-300' : 'text-gray-700'}`}>
+                        {job.company} • {job.period}
+                      </p>
                       <ul className="space-y-2">
                         {job.highlights.map((highlight, i) => (
                           <li key={i} className="flex items-start">
                             <span className="text-blue-600 mr-2">•</span>
-                            <span data-translate className={isDarkTheme ? 'text-gray-300' : 'text-gray-700'}>{highlight}</span>
+                            <span data-translate className={isDarkTheme ? 'text-gray-300' : 'text-gray-700'}>
+                              {highlight}
+                            </span>
                           </li>
                         ))}
                       </ul>
@@ -228,7 +237,8 @@ export const Portfolio = () => {
                 </div>
               </motion.div>
             )}
-
+  
+            {/* Education Section */}
             {activeSection === 'education' && (
               <motion.div
                 key="education"
@@ -236,22 +246,31 @@ export const Portfolio = () => {
                 animate={{ opacity: 1, x: 0 }}
                 exit={{ opacity: 0, x: 20 }}
                 transition={{ duration: 0.3 }}
-                className="max-w-4xl mx-auto"
+                className="max-w-4xl mx-auto px-4 sm:px-0"
               >
-                <h2 data-translate className={`text-3xl font-bold mb-8 ${isDarkTheme ? 'text-white' : 'text-gray-800'}`}>Education</h2>
-                <div className="space-y-6">
+                <h2 data-translate className={`text-2xl sm:text-3xl font-bold mb-6 sm:mb-8 ${isDarkTheme ? 'text-white' : 'text-gray-800'}`}>
+                  Education
+                </h2>
+                <div className="space-y-4 sm:space-y-6">
                   {education.map((edu, index) => (
-                    <div key={index} className={`${isDarkTheme ? 'bg-gray-800/50' : 'bg-white'} shadow-lg backdrop-blur-sm rounded-lg p-6`}>
-                      <h3 data-translate className="text-xl font-bold text-blue-600">{edu.degree}</h3>
+                    <div key={index} className={`${isDarkTheme ? 'bg-gray-800/50' : 'bg-white'} shadow-lg backdrop-blur-sm rounded-lg p-4 sm:p-6`}>
+                      <h3 data-translate className="text-lg sm:text-xl font-bold text-blue-600">{edu.degree}</h3>
                       <p data-translate className={isDarkTheme ? 'text-gray-300' : 'text-gray-700'}>{edu.school}</p>
-                      <p data-translate className={isDarkTheme ? 'text-gray-400' : 'text-gray-600'}>{edu.period} • {edu.location}</p>
-                      {edu.gpa && <p data-translate className={`mt-2 ${isDarkTheme ? 'text-gray-300' : 'text-gray-700'}`}>GPA: {edu.gpa}</p>}
+                      <p data-translate className={isDarkTheme ? 'text-gray-400' : 'text-gray-600'}>
+                        {edu.period} • {edu.location}
+                      </p>
+                      {edu.gpa && (
+                        <p data-translate className={`mt-2 ${isDarkTheme ? 'text-gray-300' : 'text-gray-700'}`}>
+                          GPA: {edu.gpa}
+                        </p>
+                      )}
                     </div>
                   ))}
                 </div>
               </motion.div>
             )}
-
+  
+            {/* Projects Section */}
             {activeSection === 'projects' && (
               <motion.div
                 key="projects"
@@ -259,22 +278,26 @@ export const Portfolio = () => {
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, y: -20 }}
                 transition={{ duration: 0.3 }}
-                className="max-w-6xl mx-auto"
+                className="max-w-6xl mx-auto px-4 sm:px-0"
               >
-                <h2 data-translate className={`text-3xl font-bold mb-8 ${isDarkTheme ? 'text-white' : 'text-gray-800'}`}>Projects</h2>
-                <ProjectFilter 
+                <h2 data-translate className={`text-2xl sm:text-3xl font-bold mb-6 sm:mb-8 ${isDarkTheme ? 'text-white' : 'text-gray-800'}`}>
+                  Projects
+                </h2>
+                <ProjectFilter
                   technologies={allTechnologies}
                   onFilter={setSelectedTech}
                   selectedTech={selectedTech}
                   isDark={isDarkTheme}
                 />
                 {isLoading ? (
-                  <div data-translate className={`text-center ${isDarkTheme ? 'text-gray-300' : 'text-gray-700'}`}>Loading projects...</div>
+                  <div data-translate className={`text-center ${isDarkTheme ? 'text-gray-300' : 'text-gray-700'}`}>
+                    Loading projects...
+                  </div>
                 ) : (
-                  <div className="grid md:grid-cols-2 gap-6">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
                     {filteredProjects.map((project, index) => (
-                      <ProjectCard 
-                        key={project.id || index} 
+                      <ProjectCard
+                        key={project.id || index}
                         project={project}
                         isDark={isDarkTheme}
                       />
@@ -283,28 +306,33 @@ export const Portfolio = () => {
                 )}
               </motion.div>
             )}
-
+  
+            {/* Skills Section */}
             {activeSection === 'skills' && (
-              <motion.div 
+              <motion.div
                 key="skills"
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 exit={{ opacity: 0 }}
-                className="max-w-6xl mx-auto"
+                className="max-w-6xl mx-auto px-4 sm:px-0"
               >
-                <h2 data-translate className={`text-3xl font-bold mb-8 ${isDarkTheme ? 'text-white' : 'text-gray-900'}`}>Skills</h2>
-                <div className="grid md:grid-cols-2 gap-6">
+                <h2 data-translate className={`text-2xl sm:text-3xl font-bold mb-6 sm:mb-8 ${isDarkTheme ? 'text-white' : 'text-gray-900'}`}>
+                  Skills
+                </h2>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
                   {Object.entries(skills).map(([category, skillList]) => (
-                    <div key={category} className={`${isDarkTheme ? 'bg-gray-800/50' : 'bg-white'} backdrop-blur-sm rounded-lg p-6`}>
-                      <h3 data-translate className="text-xl font-bold text-blue-500 mb-4">{category}</h3>
+                    <div key={category} className={`${isDarkTheme ? 'bg-gray-800/50' : 'bg-white'} backdrop-blur-sm rounded-lg p-4 sm:p-6`}>
+                      <h3 data-translate className="text-lg sm:text-xl font-bold text-blue-500 mb-4">{category}</h3>
                       <div className="space-y-4">
                         {skillList.map((skill, index) => (
                           <div key={index} className="w-full">
                             <div className="flex justify-between mb-1">
-                            <span data-translate className={isDarkTheme ? 'text-gray-300' : 'text-gray-700'}>{skill}</span>
+                              <span data-translate className={isDarkTheme ? 'text-gray-300' : 'text-gray-700'}>
+                                {skill}
+                              </span>
                               <span className={isDarkTheme ? 'text-gray-400' : 'text-gray-600'}>85%</span>
                             </div>
-                            <motion.div 
+                            <motion.div
                               className="h-2 bg-gray-700 rounded-full overflow-hidden"
                               initial={{ width: 0 }}
                               animate={{ width: "100%" }}
@@ -320,7 +348,8 @@ export const Portfolio = () => {
                 </div>
               </motion.div>
             )}
-
+  
+            {/* Blog Section */}
             {activeSection === 'blog' && (
               <motion.div
                 key="blog"
@@ -328,94 +357,100 @@ export const Portfolio = () => {
                 animate={{ opacity: 1, x: 0 }}
                 exit={{ opacity: 0, x: -20 }}
                 transition={{ duration: 0.3 }}
+                className="px-4 sm:px-0"
               >
                 <BlogSection isDark={isDarkTheme} />
               </motion.div>
             )}
-
-            {activeSection === 'contact' && (
-              <motion.div
-                key="contact"
-                initial={{ opacity: 0, y: -20 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: 20 }}
-                transition={{ duration: 0.3 }}
-                className="max-w-4xl mx-auto"
-              >
-                <h2 data-translate className={`text-3xl font-bold mb-8 ${isDarkTheme ? 'text-white' : 'text-gray-800'}`}>Contact</h2>
-                <div className="grid md:grid-cols-2 gap-8">
-                  <div className={`${isDarkTheme ? 'bg-gray-800/50' : 'bg-white'} shadow-lg backdrop-blur-sm rounded-lg p-6`}>
-                    <form onSubmit={handleSubmit} className="space-y-4">
-                      <input
-                        type="text"
-                        placeholder="Name"
-                        data-translate="Name"
-                        value={formData.name}
-                        onChange={e => setFormData({...formData, name: e.target.value})}
-                        className={`w-full ${
-                          isDarkTheme 
-                            ? 'bg-gray-700/50 text-white placeholder-gray-400' 
-                            : 'bg-white text-gray-900 placeholder-gray-500 border border-gray-200'
-                        } rounded p-2`}
-                        required
-                      />
-                      <input
-                        type="email"
-                        placeholder="Email"
-                        data-translate="Email"
-                        value={formData.email}
-                        onChange={e => setFormData({...formData, email: e.target.value})}
-                        className={`w-full ${
-                          isDarkTheme 
-                            ? 'bg-gray-700/50 text-white placeholder-gray-400' 
-                            : 'bg-white text-gray-900 placeholder-gray-500 border border-gray-200'
-                        } rounded p-2`}
-                        required
-                      />
-                      <textarea
-                        placeholder="Message"
-                        data-translate="Message"
-                        value={formData.message}
-                        onChange={e => setFormData({...formData, message: e.target.value})}
-                        className={`w-full ${
-                          isDarkTheme 
-                            ? 'bg-gray-700/50 text-white placeholder-gray-400' 
-                            : 'bg-white text-gray-900 placeholder-gray-500 border border-gray-200'
-                        } rounded p-2 h-32`}
-                        required
-                      />
-                      <button data-translate type="submit" className="bg-blue-500 hover:bg-blue-600 px-4 py-2 rounded text-white">
-                        Send Message
-                      </button>
-                      {submitStatus && (
-                        <div data-translate className="mt-4 p-4 bg-green-500/20 text-green-300 rounded-lg">
-                          {submitStatus}
-                        </div>
-                      )}
-                    </form>
-                  </div>
-                  <div className={`${isDarkTheme ? 'bg-gray-800/50' : 'bg-white'} shadow-lg backdrop-blur-sm rounded-lg p-6`}>
-                    <div className="space-y-4">
-                      <p data-translate className={`flex items-center ${isDarkTheme ? 'text-gray-300' : 'text-gray-700'}`}>
-                        <Mail className="mr-2" /> Email: Mutai.brian79@gmail.com
-                      </p>
-                      <p data-translate className={`flex items-center ${isDarkTheme ? 'text-gray-300' : 'text-gray-700'}`}>
-                        <Linkedin className="mr-2" /> LinkedIn: brian-mutai-158397202
-                      </p>
-                      <p data-translate className={`flex items-center ${isDarkTheme ? 'text-gray-300' : 'text-gray-700'}`}>
-                        <Github className="mr-2" /> GitHub: Brio97
-                      </p>
-                    </div>
+  
+          {/* Contact Section */}
+          {activeSection === 'contact' && (
+            <motion.div
+              key="contact"
+              initial={{ opacity: 0, y: -20 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: 20 }}
+              transition={{ duration: 0.3 }}
+              className="max-w-4xl mx-auto px-4 sm:px-0"
+            >
+              <h2 data-translate className={`text-2xl sm:text-3xl font-bold mb-6 sm:mb-8 ${isDarkTheme ? 'text-white' : 'text-gray-800'}`}>
+                Contact
+              </h2>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 sm:gap-8">
+                <div className={`${isDarkTheme ? 'bg-gray-800/50' : 'bg-white'} shadow-lg backdrop-blur-sm rounded-lg p-4 sm:p-6`}>
+                  <form onSubmit={handleSubmit} className="space-y-4">
+                    <input
+                      type="text"
+                      placeholder="Name"
+                      data-translate="Name"
+                      value={formData.name}
+                      onChange={e => setFormData({...formData, name: e.target.value})}
+                      className={`w-full ${
+                        isDarkTheme 
+                          ? 'bg-gray-700/50 text-white placeholder-gray-400' 
+                          : 'bg-white text-gray-900 placeholder-gray-500 border border-gray-200'
+                      } rounded p-2 sm:p-3`}
+                      required
+                    />
+                    <input
+                      type="email"
+                      placeholder="Email"
+                      data-translate="Email"
+                      value={formData.email}
+                      onChange={e => setFormData({...formData, email: e.target.value})}
+                      className={`w-full ${
+                        isDarkTheme 
+                          ? 'bg-gray-700/50 text-white placeholder-gray-400' 
+                          : 'bg-white text-gray-900 placeholder-gray-500 border border-gray-200'
+                      } rounded p-2 sm:p-3`}
+                      required
+                    />
+                    <textarea
+                      placeholder="Message"
+                      data-translate="Message"
+                      value={formData.message}
+                      onChange={e => setFormData({...formData, message: e.target.value})}
+                      className={`w-full ${
+                        isDarkTheme 
+                          ? 'bg-gray-700/50 text-white placeholder-gray-400' 
+                          : 'bg-white text-gray-900 placeholder-gray-500 border border-gray-200'
+                      } rounded p-2 sm:p-3 h-32`}
+                      required
+                    />
+                    <button 
+                      data-translate 
+                      type="submit" 
+                      className="w-full sm:w-auto bg-blue-500 hover:bg-blue-600 px-6 py-2 sm:py-3 rounded text-white"
+                    >
+                      Send Message
+                    </button>
+                    {submitStatus && (
+                      <div data-translate className="mt-4 p-4 bg-green-500/20 text-green-300 rounded-lg">
+                        {submitStatus}
+                      </div>
+                    )}
+                  </form>
+                </div>
+                <div className={`${isDarkTheme ? 'bg-gray-800/50' : 'bg-white'} shadow-lg backdrop-blur-sm rounded-lg p-4 sm:p-6`}>
+                  <div className="space-y-4">
+                    <p data-translate className={`flex items-center ${isDarkTheme ? 'text-gray-300' : 'text-gray-700'}`}>
+                      <Mail className="mr-2" /> Email: Mutai.brian79@gmail.com
+                    </p>
+                    <p data-translate className={`flex items-center ${isDarkTheme ? 'text-gray-300' : 'text-gray-700'}`}>
+                      <Linkedin className="mr-2" /> LinkedIn: brian-mutai-158397202
+                    </p>
+                    <p data-translate className={`flex items-center ${isDarkTheme ? 'text-gray-300' : 'text-gray-700'}`}>
+                      <Github className="mr-2" /> GitHub: Brio97
+                    </p>
                   </div>
                 </div>
-              </motion.div>
-            )}
-          </AnimatePresence>
-        </div>
-      </main>
-    </div>
-  );
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
+      </div>
+    </main>
+  </div>
+);
 };
-
 export default Portfolio;
-

@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef, useMemo } from 'react';
 import { FixedSizeList } from 'react-window';
 import { getLocationDetails } from '../services/location';
+import { useTranslation } from 'react-i18next';
 import Logo from '/src/assets/portfolio-logo.webp';
 
 const API_BASE = '/.netlify/functions/api';
@@ -38,11 +39,12 @@ const apiRequest = async (endpoint, options = {}) => {
 };
 
 export const TerminalWindow = ({ onCommand, isDark }) => {
+  const { t, i18n } = useTranslation();
   const [input, setInput] = useState('');
   const [history, setHistory] = useState([
     <div key="welcome" className="flex items-center gap-2">
       <img src={Logo} alt="Logo" className="w-4 h-4" />
-      Welcome! Type "help" for commands
+      <span data-translate>Welcome! Type "help" for commands</span>
     </div>
   ]);
   const [commandHistory, setCommandHistory] = useState([]);
@@ -93,17 +95,17 @@ export const TerminalWindow = ({ onCommand, isDark }) => {
 
   const handleSocialCommand = (newHistory) => {
     newHistory.push(
-      'Social Media Links',
+      <span data-translate>Social Media Links</span>,
       '━━━━━━━━━━━━━━━',
-      '• GitHub:    https://github.com/Brio97',
-      '• LinkedIn:  https://linkedin.com/in/brian-mutai-158397202',
-      '• Twitter:   @yobrade20'
+      <span data-translate>• GitHub:    https://github.com/Brio97</span>,
+      <span data-translate>• LinkedIn:  https://linkedin.com/in/brian-mutai-158397202</span>,
+      <span data-translate>• Twitter:   @yobrade20</span>
     );
     return newHistory;
   };
 
   const handleWeatherCommand = async (newHistory) => {
-    newHistory.push('Fetching weather data...');
+    newHistory.push(<span data-translate>Fetching weather data...</span>);
     try {
       if (!userLocation) {
         const position = await getLocationWithTimeout();
@@ -129,12 +131,12 @@ export const TerminalWindow = ({ onCommand, isDark }) => {
       const description = data.weather[0].description;
       
       newHistory.push(
-        `Current weather in ${location}:`,
-        `${temp}°C - ${description}`
+        <span data-translate>Current weather in {location}:</span>,
+        <span data-translate>{temp}°C - {description}</span>
       );
     } catch (error) {
       console.error('Weather error:', error);
-      newHistory.push('Unable to fetch weather data. Please try again later.');
+      newHistory.push(<span data-translate>Unable to fetch weather data. Please try again later.</span>);
     }
     return newHistory;
   };  
@@ -143,9 +145,12 @@ export const TerminalWindow = ({ onCommand, isDark }) => {
     try {
       const data = await apiRequest('translate', {
         method: 'POST',
-        body: JSON.stringify({ q: input, target: 'en' })
+        body: JSON.stringify({ 
+          q: input, 
+          target: i18n.language,
+          source: 'auto' 
+        })
       });
-
       const translatedText = data.data.translations[0].translatedText.toLowerCase().trim();
       return findAndExecuteCommand(translatedText, newHistory);
     } catch (error) {
@@ -161,31 +166,37 @@ export const TerminalWindow = ({ onCommand, isDark }) => {
 
     if (Object.keys(commands).includes(cmd)) {
       onCommand(cmd);
-      newHistory.push(`Executing: ${cmd}`);
+      newHistory.push(<span data-translate>Executing: {cmd}</span>);
     } else {
-      newHistory.push(`Command not recognized: ${text}`);
+      newHistory.push(<span data-translate>Command not recognized: {text}</span>);
     }
     return newHistory;
   };
 
   const handleCommand = async (e) => {
     if (e.key === 'Enter' && input.trim()) {
-      const newHistory = [...history, `> ${input}`];
       const trimmedInput = input.toLowerCase().trim();
 
+      if (trimmedInput === 'clear') {
+        setHistory([]);
+        setInput('');
+        return;
+      }
+
+      const newHistory = [...history, `> ${input}`];
       setIsLoading(true);
       try {
         switch(trimmedInput) {
           case 'help':
-            newHistory.push('Available commands:', ...Object.entries(commands).map(([cmd, desc]) => `${cmd}: ${desc}`));
+            newHistory.push(
+              <div data-translate>Available commands:</div>,
+              ...Object.entries(commands).map(([cmd, desc]) => (
+                <div key={cmd} data-translate>`${cmd}: {t(desc)}`</div>
+              ))
+            );
             break;
-          case 'clear':
-            setHistory([]);
-            setInput('');
-            setIsLoading(false);
-            return;
           case 'time':
-            newHistory.push(new Date().toLocaleTimeString());
+            newHistory.push(<span data-translate>{new Date().toLocaleTimeString(i18n.language)}</span>);
             break;
           case 'social':
             handleSocialCommand(newHistory);
@@ -198,7 +209,7 @@ export const TerminalWindow = ({ onCommand, isDark }) => {
         }
       } catch (error) {
         console.error('Command error:', error);
-        newHistory.push('An error occurred. Please try again.');
+        newHistory.push(<span data-translate>An error occurred. Please try again.</span>);
       } finally {
         setIsLoading(false);
         setHistory(newHistory);
@@ -230,33 +241,51 @@ export const TerminalWindow = ({ onCommand, isDark }) => {
     }
   };
 
-  const HistoryList = ({ items }) => (
-    <FixedSizeList
-      height={256}
-      itemCount={items.length}
-      itemSize={64}
-      width="100%"
-      className={isDark ? 'text-green-400' : 'text-green-600'}
-    >
-      {({ index, style }) => (
-        <div 
-          style={{ 
-            ...style, 
-            whiteSpace: 'pre-wrap', 
-            lineHeight: '1.5',
-            padding: '8px 0'
-          }} 
-          className="mb-1"
-        >
-          {items[index]}
-        </div>
-      )}
-    </FixedSizeList>
-  );    
+  const HistoryList = ({ items }) => {
+    const HistoryItem = React.memo(({ content }) => (
+      <div className="mb-1">
+        {content}
+      </div>
+    ));
 
+    return (
+      <FixedSizeList
+        height={256}
+        itemCount={items.length}
+        itemSize={64}
+        width="100%"
+        className={isDark ? 'text-green-400' : 'text-green-600'}
+      >
+        {({ index, style }) => (
+          <div 
+            style={{ 
+              ...style, 
+              whiteSpace: 'pre-wrap', 
+              lineHeight: '1.5',
+              padding: '8px 0'
+            }} 
+          >
+            <HistoryItem content={items[index]} />
+          </div>
+        )}
+      </FixedSizeList>
+    );
+  };
   useEffect(() => {
     inputRef.current?.focus();
   }, []);
+
+  useEffect(() => {
+    const currentLang = i18n.language;
+    const handleScroll = () => {
+      if (i18n.language !== currentLang) {
+        i18n.changeLanguage(currentLang);
+      }
+    };
+
+    document.addEventListener('scroll', handleScroll, { passive: true });
+    return () => document.removeEventListener('scroll', handleScroll);
+  }, [i18n]);
 
   return (
     <div className={`${isDark ? 'bg-gray-900 border-gray-700' : 'bg-white border-gray-200'} border rounded-lg p-4 font-mono shadow-lg`}>
@@ -277,7 +306,7 @@ export const TerminalWindow = ({ onCommand, isDark }) => {
       {isLoading && (
         <div className={`text-center py-2 ${isDark ? 'text-green-400' : 'text-green-600'} flex items-center justify-center gap-2`}>
           <img src={Logo} alt="Loading" className="w-4 h-4 animate-spin" />
-          Processing...
+          <span data-translate>Processing...</span>
         </div>
       )}
       <div className="flex items-center">
