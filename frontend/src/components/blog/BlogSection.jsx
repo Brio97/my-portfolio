@@ -12,7 +12,7 @@ const BlogSection = ({ isDark }) => {
       const result = await response.json();
 
       // Log the full response for debugging
-      console.log('Full API Response:', result);
+      // console.log('Full API Response:', result);
 
       // Check for HTTP errors
       if (!response.ok) {
@@ -56,6 +56,10 @@ const BlogSection = ({ isDark }) => {
 
   useEffect(() => {
     fetchBlogPosts();
+
+    const interval = setInterval(fetchBlogPosts, 300000);
+
+    return () => clearInterval(interval);
   }, []);
 
   const handlePostClick = (slug) => {
