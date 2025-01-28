@@ -1,6 +1,7 @@
 import React from 'react';
 import { motion } from 'framer-motion';
 import { Code, LineChart, Lightbulb, Target, Compass } from 'lucide-react';
+import { AdUnit } from '../AdUnit';
 
 export const About = ({ isDarkTheme }) => {
   const sections = [
@@ -67,6 +68,7 @@ export const About = ({ isDarkTheme }) => {
           </motion.div>
         ))}
       </div>
+      <AdUnit />
     </motion.div>
   );
 };
