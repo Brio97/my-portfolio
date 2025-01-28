@@ -25,6 +25,7 @@ const handler = async () => {
                   tags {
                     name
                   }
+                  responseCount
                 }
               }
             }
@@ -32,8 +33,8 @@ const handler = async () => {
         }
       }
     }
-  }
-`;
+  }`;
+
 
   try {
     console.log('Sending request with:', {
