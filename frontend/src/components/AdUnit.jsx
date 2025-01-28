@@ -16,7 +16,7 @@ export const AdUnit = () => {
     };
 
     const script = document.createElement('script');
-    script.src = 'https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js';
+    script.src = 'https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-1649606057243393';
     script.async = true;
     script.crossOrigin = 'anonymous';
     script.onload = loadAd;
@@ -34,12 +34,11 @@ export const AdUnit = () => {
         ref={adRef}
         className="adsbygoogle"
         style={{ display: 'block' }}
-        data-ad-client="pub-1649606057243393"
-        data-ad-slot="4137053655"
+        data-ad-client="ca-pub-1649606057243393"
+        data-ad-slot="7323454267"
         data-ad-format="auto"
         data-full-width-responsive="true"
       />
     </div>
   );
 };
-
