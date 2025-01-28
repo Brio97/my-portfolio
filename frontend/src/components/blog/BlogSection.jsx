@@ -35,7 +35,7 @@ const BlogSection = ({ isDark }) => {
           dateAdded: edge.node.publishedAt,
           coverImage: edge.node.coverImage?.url || null, // Extract URL from coverImage
           tags: edge.node.tags,
-          readTime: 5 // Hardcoded as Hashnode API might not return this
+          readTime: edge.node.readTimeInMinutes
         }));
       }
 
