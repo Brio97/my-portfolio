@@ -9,7 +9,12 @@ const BlogSection = ({ isDark }) => {
 
   const fetchBlogPosts = async () => {
     try {
-      const response = await fetch('/.netlify/functions/api/hashnode');
+      const response = await fetch('/.netlify/functions/api/hashnode', {
+        headers: {
+          'Cache-Control': 'no-cache',
+          'Pragma': 'no-cache'
+        }
+      });      
       const result = await response.json();
 
       if (!response.ok) {
