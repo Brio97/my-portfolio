@@ -55,15 +55,20 @@ const handler = async () => {
       })
     });
 
-    const data = await response.json();
-    console.log('Hashnode API Response:', data);
+    const result = await response.json();
+    console.log('Hashnode API Response:', result);
 
-    // Sort posts by publishedAt date before returning
-    if (data.data?.user?.publications?.edges?.[0]?.node?.posts?.edges) {
-      data.data.user.publications.edges[0].node.posts.edges.sort((a, b) => 
-        new Date(b.node.publishedAt) - new Date(a.node.publishedAt)
-      );
-    }
+    // Extract and transform posts
+    const posts = result.data?.user?.publications?.edges?.[0]?.node?.posts?.edges?.map(edge => ({
+      id: edge.node.id,
+      title: edge.node.title,
+      brief: edge.node.brief,
+      slug: edge.node.slug,
+      dateAdded: edge.node.publishedAt,
+      coverImage: edge.node.coverImage?.url || null,
+      tags: edge.node.tags || [],
+      readTime: edge.node.readTimeInMinutes
+    })) || [];
 
     return {
       statusCode: 200,
@@ -74,9 +79,10 @@ const handler = async () => {
         'Pragma': 'no-cache',
         'Expires': '0'
       },
-      body: JSON.stringify(data)
-    };
+      body: JSON.stringify({ data: { user: { publications: { edges: result.data.user.publications.edges } } } })
+    };    
   } catch (error) {
+    console.error('Fetch Error:', error);
     return {
       statusCode: 500,
       headers: {
