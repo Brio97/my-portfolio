@@ -56,6 +56,14 @@ const handler = async () => {
     });
 
     const data = await response.json();
+    console.log('Hashnode API Response:', data);
+
+    // Sort posts by publishedAt date before returning
+    if (data.data?.user?.publications?.edges?.[0]?.node?.posts?.edges) {
+      data.data.user.publications.edges[0].node.posts.edges.sort((a, b) => 
+        new Date(b.node.publishedAt) - new Date(a.node.publishedAt)
+      );
+    }
 
     return {
       statusCode: 200,
