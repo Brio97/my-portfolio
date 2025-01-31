@@ -8,16 +8,17 @@
   node_bundler = "esbuild"
   external_node_modules = ["nodemailer"]
 
-[[headers]]
-  for = "/*"
-  [headers.values]
-    Content-Security-Policy = "default-src 'self' 'unsafe-inline' 'unsafe-eval'; connect-src 'self' https://api.github.com https://*.google-analytics.com https://*.analytics.google.com https://*.googletagmanager.com https://*.g.doubleclick.net https://*.google.com https://*.adtrafficquality.google https://*.pagead2.googlesyndication.com https://*.doubleclick.net; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://*.googletagmanager.com https://*.google-analytics.com https://*.googlesyndication.com https://*.doubleclick.net https://*.adtrafficquality.google; frame-src 'self' https://*.doubleclick.net https://*.googlesyndication.com https://*.google.com https://*.adtrafficquality.google; img-src 'self' data: blob: https://*.google-analytics.com https://*.googlesyndication.com https://*.doubleclick.net https://*.google.com https://*.adtrafficquality.google https://cdn.hashnode.com"
-
 [dev]
   framework = "#custom"
   command = "npm --prefix frontend run dev"
   targetPort = 5000
   port = 8888
+
+[[headers]]
+  for = "/*"
+  [headers.values]
+    Content-Security-Policy = "default-src 'self' 'unsafe-inline' 'unsafe-eval'; connect-src 'self' https://api.github.com http://localhost:3000 http://localhost:5000 https://moderndevspace.netlify.app/.netlify/functions/ https://api-bdc.io https://api.bigdatacloud.net https://nominatim.openstreetmap.org https://translation.googleapis.com https://api.openweathermap.org https://www.google-analytics.com https://www.googletagmanager.com https://*.google.com https://*.doubleclick.net https://ep1.adtrafficquality.google https://ep2.adtrafficquality.google https://csi.gstatic.com; img-src 'self' https://cdn.hashnode.com data: blob: https://*.google.com https://*.google.co.ke https://*.googleusercontent.com https://*.gstatic.com https://*.doubleclick.net https://*.google-analytics.com https://*.adtrafficquality.google https://pagead2.googlesyndication.com https://www.googleadservices.com; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://www.googletagmanager.com https://pagead2.googlesyndication.com https://*.google.com https://*.doubleclick.net https://ep2.adtrafficquality.google; frame-src 'self' https://www.googletagmanager.com https://*.googletagmanager.com https://td.doubleclick.net https://*.doubleclick.net https://googleads.g.doubleclick.net https://tpc.googlesyndication.com https://*.google.com https://ep2.adtrafficquality.google"
+    Content-Security-Policy-Report-Only = "frame-ancestors 'self';"
 
 [[redirects]]
   from = "/api/*"
