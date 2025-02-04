@@ -7,7 +7,7 @@ export const BlogSection = ({ isDark }) => {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
   const [page, setPage] = useState(1);
-  const postsPerPage = 5;
+  const postsPerPage = 10;
 
   const fetchBlogPosts = async () => {
     try {
