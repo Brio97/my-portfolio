@@ -9,12 +9,8 @@ export const BlogSection = ({ isDark }) => {
 
   const fetchBlogPosts = async () => {
     try {
-      const response = await fetch('/.netlify/functions/api/hashnode', {
-        headers: {
-          'Cache-Control': 'no-cache',
-          'Pragma': 'no-cache'
-        }
-      });
+      const timestamp = new Date().getTime();
+      const response = await fetch(`/.netlify/functions/api/hashnode?t=${timestamp}`);
       const result = await response.json();
 
       // Log the full response for debugging
