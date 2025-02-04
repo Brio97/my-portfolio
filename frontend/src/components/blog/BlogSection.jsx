@@ -83,7 +83,7 @@ export const BlogSection = ({ isDark }) => {
   }
 
   return (
-    <div className="max-w-4xl mx-auto">
+    <div key={Date.now()} className="max-w-4xl mx-auto">
       <h2 data-translate className={`text-3xl font-bold mb-8 ${isDark ? 'text-white' : 'text-gray-900'}`}>
         Blog
       </h2>
