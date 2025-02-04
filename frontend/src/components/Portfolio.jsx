@@ -9,7 +9,7 @@ import { Education } from './sections/Education';
 import { Projects } from './sections/Projects';
 import { Skills } from './sections/Skills';
 import { Contact } from './sections/Contact';
-import BlogSection from './blog/BlogSection';
+import { BlogSection } from './blog/BlogSection';
 import { ResumeButton } from './resume/ResumeButton';
 import { fetchGithubRepos } from '../services/githubService';
 import { useTranslation } from 'react-i18next';
