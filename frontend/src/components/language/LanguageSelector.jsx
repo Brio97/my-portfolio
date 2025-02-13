@@ -94,8 +94,8 @@ export const LanguageSelector = ({ isDark }) => {
         onClick={() => setIsOpen(!isOpen)}
         className={`p-1 sm:p-2 ${isDark ? 'hover:bg-gray-800' : 'hover:bg-gray-100'} rounded-lg transition-colors flex items-center`}
       >
-        <Globe size={18} className={isDark ? 'text-white' : 'text-gray-700'} />
-        <span className="ml-1 sm:ml-2 text-xs sm:text-sm">
+        <Globe size={18} className={isDark ? 'text-white' : 'text-blue-600'} />
+        <span className={`ml-1 sm:ml-2 text-xs sm:text-sm ${isDark ? 'text-white' : 'text-blue-600'}`}>
           {i18n.language.toUpperCase()}
         </span>
       </button>

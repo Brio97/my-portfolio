@@ -5,6 +5,8 @@ const weatherHandler = require('./handlers/weatherHandler');
 const githubHandler = require('./handlers/githubHandler');
 const locationHandler = require('./handlers/locationHandler');
 const hashnodeHandler = require('./handlers/hashnodeHandler');
+const mediumHandler = require('./handlers/mediumHandler');
+const devtoHandler = require('./handlers/devtoHandler');
 
 exports.handler = async (event, context) => {
   // Enable CORS
@@ -47,7 +49,13 @@ exports.handler = async (event, context) => {
         break;
       case 'hashnode':
         response = await hashnodeHandler(event);
-        break
+        break;
+      case 'medium':
+        response = await mediumHandler(event);
+        break;
+      case 'devto':
+        response = await devtoHandler(event);
+        break;
       default:
         return {
           statusCode: 404,

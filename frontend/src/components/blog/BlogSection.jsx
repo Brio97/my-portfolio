@@ -11,36 +11,44 @@ export const BlogSection = ({ isDark }) => {
 
   const fetchBlogPosts = async () => {
     try {
-      const response = await fetch('/.netlify/functions/api/hashnode');
-      const result = await response.json();
-
-      if (!response.ok) {
-        throw new Error('Network response was not ok');
-      }
-
-      if (result.errors) {
-        throw new Error(result.errors[0].message);
-      }
-
-      let posts = [];
-      if (result.data?.user?.publications?.edges?.length > 0) {
-        posts = result.data.user.publications.edges[0].node.posts.edges.map(edge => ({
-          id: edge.node.id,
-          title: edge.node.title,
-          brief: edge.node.brief,
-          slug: edge.node.slug,
-          dateAdded: edge.node.publishedAt,
-          coverImage: edge.node.coverImage?.url || null,
-          tags: edge.node.tags,
-          readTime: edge.node.readTimeInMinutes || 5
-        }));
-      }
-
-      if (posts.length === 0) {
-        throw new Error('No posts found');
-      }
-
-      setBlogPosts(posts);
+      const [hashnodeResponse, mediumResponse, devToResponse] = await Promise.all([
+        fetch('/.netlify/functions/api/hashnode'),
+        fetch('/.netlify/functions/api/medium'),
+        fetch('/.netlify/functions/api/devto')
+      ]);
+  
+      const [hashnodePosts, mediumPosts, devToPosts] = await Promise.all([
+        hashnodeResponse.ok ? hashnodeResponse.json() : [],
+        mediumResponse.ok ? mediumResponse.json() : [],
+        devToResponse.ok ? devToResponse.json() : []
+      ]);
+  
+      // Combine all posts
+      const allPosts = [
+        ...(Array.isArray(hashnodePosts) ? hashnodePosts : []),
+        ...(Array.isArray(mediumPosts) ? mediumPosts : []),
+        ...(Array.isArray(devToPosts) ? devToPosts : [])
+      ];
+  
+      // Filter out duplicates based on title
+      const uniquePosts = allPosts.reduce((acc, current) => {
+        const x = acc.find(item => item.title === current.title);
+        if (!x) {
+          return acc.concat([current]);
+        }
+        // If duplicate found, prefer Hashnode > Dev.to > Medium
+        const index = acc.findIndex(item => item.title === current.title);
+        if (current.platform === 'hashnode' || 
+           (current.platform === 'devto' && acc[index].platform === 'medium')) {
+          acc[index] = current;
+        }
+        return acc;
+      }, []);
+  
+      // Sort by date
+      const sortedPosts = uniquePosts.sort((a, b) => new Date(b.dateAdded) - new Date(a.dateAdded));
+  
+      setBlogPosts(sortedPosts);
       setError(null);
     } catch (error) {
       console.error('Error fetching blog posts:', error.message);
@@ -49,7 +57,7 @@ export const BlogSection = ({ isDark }) => {
     } finally {
       setIsLoading(false);
     }
-  };
+  };   
 
   useEffect(() => {
     fetchBlogPosts();
@@ -57,8 +65,8 @@ export const BlogSection = ({ isDark }) => {
     return () => clearInterval(interval);
   }, []);
 
-  const handlePostClick = (slug) => {
-    window.open(`https://moderndevspace.hashnode.dev/${slug}`, '_blank');
+  const handlePostClick = (post) => {
+    window.open(post.url, '_blank');
   };
 
   const paginatedPosts = blogPosts.slice(0, page * postsPerPage);
@@ -97,7 +105,7 @@ export const BlogSection = ({ isDark }) => {
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.3 }}
-                onClick={() => handlePostClick(post.slug)}
+                onClick={() => handlePostClick(post)}
                 className={`${
                   isDark ? 'bg-gray-800/50' : 'bg-white'
                 } rounded-lg p-6 cursor-pointer hover:shadow-lg transition-all`}

@@ -107,26 +107,26 @@ export const TerminalWindow = ({ onCommand, isDark }) => {
   const handleWeatherCommand = async (newHistory) => {
     newHistory.push(<span data-translate>Fetching weather data...</span>);
     try {
-      if (!userLocation) {
-        const position = await getLocationWithTimeout();
-        const locationData = await getLocationDetails(
-          position.coords.latitude,
-          position.coords.longitude
-        );
-        setUserLocation(locationData);
-      }
-  
-      const query = userLocation 
-        ? `weather?lat=${userLocation.lat}&lon=${userLocation.lon}`
-        : 'weather?q=Nairobi';
+      // First attempt to get user's location
+      const position = await getLocationWithTimeout();
       
-      const data = await apiRequest(query);
+      // If position is successfully obtained, get detailed location info
+      const locationData = await getLocationDetails(
+        position.coords.latitude,
+        position.coords.longitude
+      );
+      
+      // Set the user location in state for future use
+      setUserLocation(locationData);
+      
+      // Make weather API call with exact coordinates
+      const data = await apiRequest(`weather?lat=${position.coords.latitude}&lon=${position.coords.longitude}`);
       
       if (!data || !data.weather) {
         throw new Error('Invalid weather data received');
       }
   
-      const location = userLocation?.city || 'Nairobi';
+      const location = locationData?.city || data.name;
       const temp = Math.round(data.main.temp);
       const description = data.weather[0].description;
       
@@ -136,10 +136,24 @@ export const TerminalWindow = ({ onCommand, isDark }) => {
       );
     } catch (error) {
       console.error('Weather error:', error);
-      newHistory.push(<span data-translate>Unable to fetch weather data. Please try again later.</span>);
+      newHistory.push(<span data-translate>Unable to fetch precise location. Showing default weather data.</span>);
+      
+      // Only fall back to default location if geolocation fails
+      try {
+        const data = await apiRequest('weather?q=Nairobi');
+        const temp = Math.round(data.main.temp);
+        const description = data.weather[0].description;
+        
+        newHistory.push(
+          <span data-translate>Weather in Nairobi:</span>,
+          <span data-translate>{temp}°C - {description}</span>
+        );
+      } catch (fallbackError) {
+        newHistory.push(<span data-translate>Weather service temporarily unavailable.</span>);
+      }
     }
     return newHistory;
-  };  
+  };    
 
   const handleTranslation = async (input, newHistory) => {
     try {

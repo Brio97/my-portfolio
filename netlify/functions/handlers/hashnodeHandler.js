@@ -36,12 +36,6 @@ const handler = async () => {
   }`;
 
   try {
-    console.log('Sending request with:', {
-      url: HASHNODE_API,
-      token: HASHNODE_TOKEN ? 'Present' : 'Missing',
-      username: HASHNODE_USERNAME
-    });
-
     const response = await fetch(HASHNODE_API, {
       method: 'POST',
       headers: {
@@ -49,16 +43,12 @@ const handler = async () => {
         'Authorization': `Bearer ${HASHNODE_TOKEN}`,
         'User-Agent': 'Netlify Function Hashnode Blog Fetcher'
       },
-      body: JSON.stringify({ 
-        query,
-        variables: {} 
-      })
+      body: JSON.stringify({ query })
     });
 
     const result = await response.json();
-    console.log('Hashnode API Response:', result);
 
-    // Extract and transform posts
+    // Transform posts to normalized format
     const posts = result.data?.user?.publications?.edges?.[0]?.node?.posts?.edges?.map(edge => ({
       id: edge.node.id,
       title: edge.node.title,
@@ -67,19 +57,18 @@ const handler = async () => {
       dateAdded: edge.node.publishedAt,
       coverImage: edge.node.coverImage?.url || null,
       tags: edge.node.tags || [],
-      readTime: edge.node.readTimeInMinutes
+      readTime: edge.node.readTimeInMinutes,
+      platform: 'hashnode',
+      url: `https://moderndevspace.hashnode.dev/${edge.node.slug}`
     })) || [];
 
     return {
       statusCode: 200,
       headers: {
         'Content-Type': 'application/json',
-        'Access-Control-Allow-Origin': '*',
-        'Cache-Control': 'no-cache, no-store, must-revalidate',
-        'Pragma': 'no-cache',
-        'Expires': '0'
+        'Access-Control-Allow-Origin': '*'
       },
-      body: JSON.stringify({ data: { user: { publications: { edges: result.data.user.publications.edges } } } })
+      body: JSON.stringify(posts)
     };    
   } catch (error) {
     console.error('Fetch Error:', error);
@@ -88,7 +77,7 @@ const handler = async () => {
       headers: {
         'Access-Control-Allow-Origin': '*'
       },
-      body: JSON.stringify({ error: error.message })
+      body: JSON.stringify([])
     };
   }
 };
