@@ -1,6 +1,4 @@
 const contactHandler = require('./handlers/contactHandler');
-const translateHandler = require('./handlers/translateHandler');
-const languagesHandler = require('./handlers/languagesHandler');
 const weatherHandler = require('./handlers/weatherHandler');
 const githubHandler = require('./handlers/githubHandler');
 const locationHandler = require('./handlers/locationHandler');
@@ -31,12 +29,6 @@ exports.handler = async (event, context) => {
     switch (path) {
       case 'contact':
         response = await contactHandler(event);
-        break;
-      case 'translate':
-        response = await translateHandler(event);
-        break;
-      case 'translate/languages':
-        response = await languagesHandler(event);
         break;
       case 'weather':
         response = await weatherHandler(event);

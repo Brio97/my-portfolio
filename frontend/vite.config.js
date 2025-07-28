@@ -14,22 +14,7 @@ export default defineConfig(({ mode }) => {
           changeOrigin: true,
           rewrite: (path) => path.replace(/^\/api\/weather/, '/data/2.5/weather')
         },
-        '/api/translate/languages': {
-          target: 'https://translation.googleapis.com/language/translate/v2/languages',
-          changeOrigin: true,
-          headers: {
-            'X-Goog-Api-Key': env.VITE_GOOGLE_TRANSLATE_API_KEY
-          },
-          rewrite: (path) => `?key=${env.VITE_GOOGLE_TRANSLATE_API_KEY}&target=en`
-        },
-        '/api/translate': {
-          target: 'https://translation.googleapis.com/language/translate/v2',
-          changeOrigin: true,
-          headers: {
-            'X-Goog-Api-Key': env.VITE_GOOGLE_TRANSLATE_API_KEY
-          },
-          rewrite: (path) => `?key=${env.VITE_GOOGLE_TRANSLATE_API_KEY}`
-        }
+
       }
     }
   }

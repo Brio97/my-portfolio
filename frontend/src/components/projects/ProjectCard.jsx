@@ -57,12 +57,16 @@ export const ProjectCard = ({ project, isDark }) => {
             )}
             
             {project.demo && (
-              <div className="aspect-w-16 aspect-h-9">
-                <iframe 
-                  src={project.demo}
-                  className="w-full h-full rounded-lg"
-                  allowFullScreen
-                />
+              <div>
+                <h4 data-translate className="font-semibold mb-2">Live Demo Preview</h4>
+                <div className="aspect-w-16 aspect-h-9 relative" style={{ paddingBottom: '56.25%' }}>
+                  <iframe 
+                    src={project.demo}
+                    className="absolute inset-0 w-full h-full rounded-lg border-2 border-gray-300"
+                    allowFullScreen
+                    title={`${project.name} Demo`}
+                  />
+                </div>
               </div>
             )}
           </motion.div>

@@ -16,7 +16,7 @@ export const projects = [
   ];
   
   export const skills = {
-    "Technical": ["React", "Python", "JavaScript", "SQL", "Git"],
+    "Technical": ["React", "Python", "JavaScript", "SQL", "Git", "GCP"],
     "Insurance": ["Risk Analysis", "Underwriting", "Claims Processing"],
     "Analysis": ["Data Analysis", "Risk Assessment", "Problem Solving"],
     "Soft Skills": ["Communication", "Team Collaboration", "Client Relations"]
@@ -29,7 +29,7 @@ export const projects = [
       period: "Dec 2021 - June 2024",
       highlights: [
         "Worked with software development team on projects and assisted in creating products",
-        "Monitored clients' insurance coverage and managed claims processing",
+        "Managed clients' insurance coverages and managed claims processing",
         "Developed expertise in insurtech solutions and digital transformation"
       ]
     },
@@ -57,7 +57,7 @@ export const projects = [
       school: "Jomo Kenyatta University of Agriculture and Technology",
       period: "May 2015 - Dec 2018",
       location: "Nairobi",
-      gpa: "3.5"
+      gpa: "3.0"
     }
   ];
   

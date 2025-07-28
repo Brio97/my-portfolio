@@ -11,15 +11,14 @@ import { Skills } from './sections/Skills';
 import { Contact } from './sections/Contact';
 import { BlogSection } from './blog/BlogSection';
 import { ResumeButton } from './resume/ResumeButton';
-import { fetchGithubRepos } from '../services/githubService';
+import { projects, getAllTechnologies, filterProjectsByTech } from '../data/projects';
 import { useTranslation } from 'react-i18next';
 
 export const Portfolio = () => {
   const { t } = useTranslation();
   const [activeSection, setActiveSection] = useState('home');
   const [showTerminal, setShowTerminal] = useState(false);
-  const [githubProjects, setGithubProjects] = useState([]);
-  const [isLoading, setIsLoading] = useState(true);
+  const [isLoading, setIsLoading] = useState(false);
   const [isDarkTheme, setIsDarkTheme] = useState(true);
   const [selectedTech, setSelectedTech] = useState(null);
   const [formData, setFormData] = useState({
@@ -38,18 +37,7 @@ export const Portfolio = () => {
     }
   }, []);
 
-  useEffect(() => {
-    const loadGithubProjects = async () => {
-      try {
-        setIsLoading(true);
-        const repos = await fetchGithubRepos();
-        setGithubProjects(repos);
-      } finally {
-        setIsLoading(false);
-      }
-    };
-    loadGithubProjects();
-  }, []);
+
 
   const handleSectionChange = (section) => {
     setActiveSection(section);
@@ -99,11 +87,8 @@ export const Portfolio = () => {
     }
   };
 
-  const filteredProjects = selectedTech
-    ? githubProjects.filter(project => project.technologies.includes(selectedTech))
-    : githubProjects;
-
-  const allTechnologies = [...new Set(githubProjects.flatMap(project => project.technologies))];
+  const filteredProjects = filterProjectsByTech(selectedTech);
+  const allTechnologies = getAllTechnologies();
 
   return (
     <div className={`min-h-screen w-screen ${isDarkTheme ? 'bg-gray-900 text-white' : 'bg-gray-100 text-gray-800'} relative overflow-x-hidden`}>
