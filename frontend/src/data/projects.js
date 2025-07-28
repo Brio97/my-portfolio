@@ -62,7 +62,7 @@ export const projects = [
       'User-friendly React frontend',
       'Logistics and supply chain operations'
     ],
-    demo: null // Add your live demo URL here if deployed
+    demo: 'https://fuata-tech-client.onrender.com'
   }
 ];
 
