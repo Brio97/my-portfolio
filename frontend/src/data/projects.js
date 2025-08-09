@@ -63,6 +63,28 @@ export const projects = [
       'Logistics and supply chain operations'
     ],
     demo: 'https://fuata-tech-client.onrender.com'
+  },
+  {
+    "id": "task-manager",
+    "name": "Personal Task Manager",
+    "description": "A simple web-based task manager built with Ruby and the Sinatra web framework.",
+    "technologies": ["Ruby", "Sinatra", "ERB", "HTML", "CSS"],
+    "homepage": "https://ruby-task-manager-app-da58b8ed0170.herokuapp.com/",
+    "html_url": "https://github.com/Brio97/task-manager",
+    "stargazers_count": 0,
+    "forks_count": 0,
+    "isPrivate": false,
+    "screenshot": "/images/task-manager-preview.png",
+    "features": [
+      "Add new tasks",
+      "Mark tasks as completed or pending",
+      "Delete tasks",
+      "View task creation timestamps",
+      "Responsive web interface",
+      "Flash messages for user feedback",
+      "JSON API endpoint at /api/tasks"
+    ],
+    demo: null // Disabled due to X-Frame-Options, visit homepage link instead
   }
 ];
 
