@@ -16,7 +16,7 @@ export const projects = [
   ];
   
   export const skills = {
-    "Technical": ["React", "Python", "JavaScript", "SQL", "Git", "GCP"],
+    "Technical": ["React", "Python", "JavaScript", "SQL", "Git", "GCP", "Ruby on sinatra"],
     "Insurance": ["Risk Analysis", "Underwriting", "Claims Processing"],
     "Analysis": ["Data Analysis", "Risk Assessment", "Problem Solving"],
     "Soft Skills": ["Communication", "Team Collaboration", "Client Relations"]
